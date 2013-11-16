@@ -126,7 +126,7 @@ module.exports = function(grunt) {
 			}], function( answers ) {
 
 				if( !answers.are_you_sure ){
-					grunt.log.writeln( 'Removing temporary directory ' + svnpath );
+					grunt.log.writeln( 'Aborting...' );
 					return;
 				}
 
