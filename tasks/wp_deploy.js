@@ -74,9 +74,9 @@ module.exports = function(grunt) {
 
 		//Get versions:
 		var readme = grunt.file.read(readme_file);
-		var readmeVersion = readme.match( new RegExp("^Stable tag: (.+)","im") );
+		var readmeVersion = readme.match( new RegExp("^Stable tag:\\s*(\\S+)","im") );
 		var plugin = grunt.file.read(plugin_file);
-		var pluginVersion = plugin.match( new RegExp("^Version: (.+)","im") );
+		var pluginVersion = plugin.match( new RegExp("^Version:\\s*(\\S+)","im") );
 
 		//Check versions
 		if(  projectVersionCompare( pluginVersion[1],  readmeVersion[1] )  !== 0 ){
