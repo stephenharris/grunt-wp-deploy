@@ -80,8 +80,9 @@ module.exports = function(grunt) {
 
 		//Check versions
 		if(  projectVersionCompare( pluginVersion[1],  readmeVersion[1] )  !== 0 ){
-			grunt.log.warn( 'Versions do not match:');	
-			grunt.log.warn( "(readme.txt) " + readmeVersion[1] + " != " + pluginVersion[1] + " ("+plugin_file+")" );	
+			grunt.log.warn( "Readme.txt version: " + readmeVersion[1] );
+			grunt.log.warn( slug+".php version: " + pluginVersion[1] );
+			grunt.fail.warn( 'Versions do not match:');	
 		}
 
 		//Set some varaibles
