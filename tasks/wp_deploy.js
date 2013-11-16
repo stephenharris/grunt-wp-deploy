@@ -95,7 +95,7 @@ module.exports = function(grunt) {
 
 		//Check out SVN repo
 		grunt.log.writeln( 'Checking out '+ svnurl );
-		var cmd = exec( 'svn co '+svnurl+ ' ' + svnpath, {}, function(){
+		cmd = exec( 'svn co '+svnurl+ ' ' + svnpath, {}, function(){
 
 			if( !grunt.file.exists(  svnpath ) ){
 				grunt.fail.fatal( 'Checkout of "'+svnurl+'"unsuccessful');
