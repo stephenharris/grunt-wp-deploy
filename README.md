@@ -22,11 +22,11 @@ grunt.loadNpmTasks('grunt-wp-deploy');
 This task is for deploying a plug-in to the [WordPress repository](http://wordpress.org/plugins/) from a 'build directory'. 
 
 ### Before you start, you'll need...
- - To have been [accepted](http://wordpress.org/plugins/about/) on to the WordPress repository
- - **plugin-slug** - You can get this from your plug-in's repo url: *http://wordpress.org/plugins/**{plugin-slug}***
- - **readme.txt** - See [http://wordpress.org/plugins/about/#readme](http://wordpress.org/plugins/about/#readme) 
- - **plugin-slug.php** - The 'main file' of the plug-in (containing the plugin header). Currently this must be named **{plugin-slug}.php** where {plugin-slug} your plug-in's slug.
- - **build directory** - This a complete copy of the plug-in as you want it on the directory
+ 1. To have been [accepted](http://wordpress.org/plugins/about/) on to the WordPress repository
+ 2. **plugin-slug** - You can get this from your plug-in's repo url: *http://wordpress.org/plugins/{plugin-slug}*
+ 3. **readme.txt** - See [http://wordpress.org/plugins/about/#readme](http://wordpress.org/plugins/about/#readme) 
+ 4. **plugin-slug.php** - The 'main file' of the plug-in (containing the plugin header). Currently this must be named **{plugin-slug}.php** where {plugin-slug} should be replaced by your plug-in's slug. See (2).
+ 5. **build directory** - This a complete copy of the plug-in as you want it on the directory
 
 ### Overview
 In your project's Gruntfile, add a section named `wp_deploy` to the data object passed into `grunt.initConfig()`.
@@ -51,7 +51,7 @@ grunt.initConfig({
 Type: `String`
 Default value: `false`
 
-Your plug-in's slug as indicated by its repository url *http://wordpress.org/plugins/**{plugin-slug}***
+Your plug-in's slug as indicated by its repository url *http://wordpress.org/plugins/{plugin-slug}*
 
 #### options.svn_user
 Type: `String`
@@ -76,4 +76,14 @@ For flexibilty this plug-in can work with other repos. Simple provide the SVN ur
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
-_(Nothing yet)_
+
+#### 0.2.0
+ - Improved regex for version detection in readme.txt / {plugin-slug}.php
+ - Abort (fail with warning) if error messages do match
+ - Linted plug-in
+ - Corrected abort message
+ - Fixed readme
+
+#### 0.1.0
+Initial release
+
