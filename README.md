@@ -77,9 +77,12 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+#### 0.3.0
+ - Improved regex for version detection in `{plugin-slug}.php`
+
 #### 0.2.0
- - Improved regex for version detection in readme.txt / {plugin-slug}.php
- - Abort (fail with warning) if error messages do match
+ - Improved regex for version detection in `readme.txt` / `{plugin-slug}.php`
+ - Abort (fail with warning) if versions do not match
  - Linted plug-in
  - Corrected abort message
  - Fixed readme
