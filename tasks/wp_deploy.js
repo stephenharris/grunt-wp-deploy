@@ -64,7 +64,7 @@ module.exports = function(grunt) {
 
 		//Try to find readme
 		if ( !grunt.file.exists(readme_file) ) {
-			grunt.fail.warn('readme.txt file not not found.');
+			grunt.fail.warn('readme.txt file not not found at ' + readme_file );
 		}
 
 		//Try to find plug-in file
