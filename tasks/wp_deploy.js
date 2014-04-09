@@ -95,11 +95,14 @@ module.exports = function(grunt) {
 
 		//Check out SVN repo
 		grunt.log.writeln( 'Checking out '+ svnurl );
-		cmd = exec( 'svn co '+svnurl+ ' ' + svnpath, {}, function(){
+		cmd = exec( 'svn co '+svnurl+ ' ' + svnpath, {}, function (error, stdout, stderr) {
 
-			if( !grunt.file.exists(  svnpath ) ){
-				grunt.fail.fatal( 'Checkout of "'+svnurl+'"unsuccessful');
+			if (error !== null) {
+				grunt.fail.fatal( 'Checkout of "'+svnurl+'"unsuccessful: ' + error);
 			}
+
+			grunt.log.writeln(stdout);			
+			grunt.log.writeln(stderr);
 
 			grunt.log.writeln( 'Check out complete.');
 
@@ -116,48 +119,62 @@ module.exports = function(grunt) {
 
 			//Copying build to temporary directory
 			grunt.log.writeln( 'Copying ' + build_dir + ' to ' + svnpath+'/trunk/');
-			exec( 'cp -ar '+ build_dir + '. ' + svnpath+'/trunk/' );
+			exec( 'cp -a '+ build_dir + '. ' + svnpath+'/trunk/', function (error, stdout, stderr) {
 
-			//Lets ask for confirmation before commit stuff
-			inquirer.prompt( [
-			{
-				type: "confirm",
-				name: "are_you_sure",
-				message: 'Are you sure you want to commit "'+ new_version+'"?'
-			}], function( answers ) {
-
-				if( !answers.are_you_sure ){
-					grunt.log.writeln( 'Aborting...' );
-					return;
+    				if (error !== null) {
+					grunt.fail.warn( 'Failed to copy into trunk: ' + error );
 				}
 
-				//Add all new files that are not set to be ignored
-				cmd = "cd "+svnpath+"/trunk; pwd;";
-				cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
-				cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
+				//Lets ask for confirmation before commit stuff
+				inquirer.prompt( [
+				{
+					type: "confirm",
+					name: "are_you_sure",
+					message: 'Are you sure you want to commit "'+ new_version+'"?'
+				}], function( answers ) {
 
-				exec(cmd,{}, function( a, b, c ){
+					if( !answers.are_you_sure ){
+						grunt.log.writeln( 'Aborting...' );
+						return;
+					}
+	
+					//Add all new files that are not set to be ignored
+					cmd = "cd "+svnpath+"/trunk; pwd;";
+					cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
+					cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
 
-					//Commit to trunk
-					grunt.log.writeln( 'Committing to trunk');
-					var cmd = exec( 'cd '+svnpath+'/trunk\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"',{}, function( a, b, c ){
+					cmd = exec(cmd,{}, function( a, b, c ){
 
-						//Copy to tag
-						grunt.log.writeln( 'Copying to tag');
-						var cmd = exec( "cd "+svnpath+"\n svn copy trunk/ tags/"+new_version, {}, function( a, b,c ){
+						//Commit to trunk
+						grunt.log.writeln( 'Committing to trunk');
+						var cmd = exec( 'cd '+svnpath+'/trunk\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"',{}, function(error, stdout, stderr) {
 
-							//Commit tag
-							grunt.log.writeln( 'Committing tag');
-							var cmd = exec( 'cd '+svnpath+'/tags/'+new_version+'\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"', {}, function( a,b,c){
-								done();
+			    				if (error !== null) {
+								grunt.fail.warn( 'Failed to commit to trunk: ' + error );
+							}
+
+							//Copy to tag
+							grunt.log.writeln( 'Copying to tag');
+	
+							var cmd = exec( "cd "+svnpath+"\n svn copy trunk/ tags/"+new_version, {}, function( error, stdout, stderr) {
+				    				if (error !== null) {
+									grunt.fail.warn( 'Failed to copy to tag: ' + error );
+								}
+								//Commit tag
+								grunt.log.writeln( 'Committing tag');
+								var cmd = exec( 'cd '+svnpath+'/tags/'+new_version+'\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"', {}, function( error, stdout, stderr) {
+									if (error !== null) {
+										grunt.fail.warn( 'Failed to comit tag: ' + error );
+									}
+									done();
+								});
 							});
 
-						});
+						} );
+					});
 
-					} );
-				});
-
-			});//Confirmation
+				});//Confirmation
+			});
 
 		});
 	}); //Initial questions
