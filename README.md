@@ -77,6 +77,10 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### 0.4.0
+ - Add more verbose error messages.
+ - Use `cp -a` instead of `cp -ar` (fixes #1,#2)
+
 #### 0.3.0
  - Improved regex for version detection in `{plugin-slug}.php`
 
