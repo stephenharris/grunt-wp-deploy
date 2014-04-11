@@ -112,7 +112,7 @@ module.exports = function(grunt) {
 
 			//Clearing trunk
 			grunt.log.writeln( 'Clearing trunk.');
-			exec( 'rm -fr '+svnpath+"/trunk/*" );
+			exec( 'find '+svnpath+"/trunk -not -path '*.svn*' -type f -delete" );
 
 			//grunt.log.writeln( 'Ignoring github specific files and deployment script.');
 			exec( 'svn propset svn:ignore "deploy.sh readme.md .git .gitignore" "'+svnpath+'/trunk/"' );
