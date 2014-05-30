@@ -27,6 +27,7 @@ This task is for deploying a plug-in to the [WordPress repository](http://wordpr
  3. **readme.txt** - See [http://wordpress.org/plugins/about/#readme](http://wordpress.org/plugins/about/#readme) 
  4. **plugin-slug.php** - The 'main file' of the plug-in (containing the plugin header). Currently this must be named **{plugin-slug}.php** where {plugin-slug} should be replaced by your plug-in's slug. See (2).
  5. **build directory** - This a complete copy of the plug-in as you want it on the directory
+ 6. (Optional) **assets directory** - This directory should contain the plug-in's screenshots and other files you want in the 'assets' directory in the root of the plug-ins WordPress SVN repo. See [https://wordpress.org/plugins/about/faq/](https://wordpress.org/plugins/about/faq/) for details.
 
 ### Overview
 In your project's Gruntfile, add a section named `wp_deploy` to the data object passed into `grunt.initConfig()`.
@@ -39,6 +40,7 @@ grunt.initConfig({
 				plugin_slug: 'your-plugin-slug',
 				svn_user: 'your-wp-repo-username',	
 				build_dir: 'build' //relative path to your build directory
+				assets_dir: 'wp-assets' //relative path to your assets directory (optional).
 			},
 		}
 	},
@@ -65,6 +67,13 @@ Default value: `false`
 
 The directory where the plug-in exists as you want it on the repo.
 
+#### options.assets_dir
+Type: `String`
+Default value: `false`
+
+The directory where the plug-in's assets (i.e. screenshots) exist. This gets copied into the 'assets' directory in the root of your WordPress SVN repo. Typically
+this directory contains your plug-in's screenshots, which you want uploaded to the WordPress repo, but do not necessary want included in the plug-in distrubted 
+to users. For more details see: [https://wordpress.org/plugins/about/faq/](https://wordpress.org/plugins/about/faq/).
 
 #### options.svn_url
 Type: `String`
@@ -76,6 +85,9 @@ For flexibilty this plug-in can work with other repos. Simple provide the SVN ur
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
+
+### 0.5.0
+ - Added support for `assets_dir`
 
 ### 0.4.0
  - Add more verbose error messages.

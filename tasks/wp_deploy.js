@@ -25,6 +25,7 @@ module.exports = function(grunt) {
 		svn_user: false,
 		plugin_slug: false,
 		build_dir: false,
+		assets_dir: false,
 	});
 
 	var pkg = grunt.file.readJSON('package.json');
@@ -124,6 +125,17 @@ module.exports = function(grunt) {
     				if (error !== null) {
 					grunt.fail.warn( 'Failed to copy into trunk: ' + error );
 				}
+    			
+    			//If the assets folder is provided, copy this into assets
+    			if( options.assets_dir ){
+    				var assets_dir = options.assets_dir.replace(/\/?$/, '/'); //trailing slash
+    			
+    				exec( 'cp -a '+ assets_dir + '. ' + svnpath+'/assets/', function (error, stdout, stderr) {
+        				if (error !== null) {
+        					grunt.fail.warn( 'Failed to copy into assets : ' + error );
+        				}
+    				});
+    			}
 
 				//Lets ask for confirmation before commit stuff
 				inquirer.prompt( [
@@ -198,3 +210,4 @@ module.exports = function(grunt) {
 	return 0;
    };
 };
+
