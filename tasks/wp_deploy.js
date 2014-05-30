@@ -122,20 +122,19 @@ module.exports = function(grunt) {
 			grunt.log.writeln( 'Copying ' + build_dir + ' to ' + svnpath+'/trunk/');
 			exec( 'cp -a '+ build_dir + '. ' + svnpath+'/trunk/', function (error, stdout, stderr) {
 
-    				if (error !== null) {
+				if (error !== null) {
 					grunt.fail.warn( 'Failed to copy into trunk: ' + error );
 				}
-    			
-    			//If the assets folder is provided, copy this into assets
-    			if( options.assets_dir ){
-    				var assets_dir = options.assets_dir.replace(/\/?$/, '/'); //trailing slash
-    			
-    				exec( 'cp -a '+ assets_dir + '. ' + svnpath+'/assets/', function (error, stdout, stderr) {
-        				if (error !== null) {
-        					grunt.fail.warn( 'Failed to copy into assets : ' + error );
-        				}
-    				});
-    			}
+
+				//If the assets folder is provided, copy this into assets
+				if( options.assets_dir ){
+					var assets_dir = options.assets_dir.replace(/\/?$/, '/'); //trailing slash
+					exec( 'cp -a '+ assets_dir + '. ' + svnpath+'/assets/', function (error, stdout, stderr) {
+						if (error !== null) {
+							grunt.fail.warn( 'Failed to copy into assets : ' + error );
+						}
+					});
+				}
 
 				//Lets ask for confirmation before commit stuff
 				inquirer.prompt( [
@@ -161,7 +160,7 @@ module.exports = function(grunt) {
 						grunt.log.writeln( 'Committing to trunk');
 						var cmd = exec( 'cd '+svnpath+'/trunk\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"',{}, function(error, stdout, stderr) {
 
-			    				if (error !== null) {
+							if (error !== null) {
 								grunt.fail.warn( 'Failed to commit to trunk: ' + error );
 							}
 
@@ -169,7 +168,7 @@ module.exports = function(grunt) {
 							grunt.log.writeln( 'Copying to tag');
 	
 							var cmd = exec( "cd "+svnpath+"\n svn copy trunk/ tags/"+new_version, {}, function( error, stdout, stderr) {
-				    				if (error !== null) {
+								if (error !== null) {
 									grunt.fail.warn( 'Failed to copy to tag: ' + error );
 								}
 								//Commit tag
