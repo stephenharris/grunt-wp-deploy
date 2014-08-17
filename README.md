@@ -86,6 +86,9 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### 1.0.1 - 17th August 2014
+- Run assets after commiting to trunk/tag has complete. Fixes SVN E155037 error.
+
 ### 1.0.0 - 26th June 2014
 - Rewrote task to use `grunt.file.copy` (skirts around issues on Windows)
 - Fixed bugs (related to SVN) with commiting the assets directory
