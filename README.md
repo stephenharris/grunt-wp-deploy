@@ -86,6 +86,10 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### 1.0.0 - 26th June 2014
+- Rewrote task to use `grunt.file.copy` (skirts around issues on Windows)
+- Fixed bugs (related to SVN) with commiting the assets directory
+
 ### 0.5.0
  - Added support for `assets_dir`
 
