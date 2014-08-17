@@ -147,21 +147,7 @@ module.exports = function(grunt) {
 						cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
 	
 						cmd = exec(cmd,{}, function( a, b, c ){
-	
-							//Commit assets
-							if( options.assets_dir ){
-								grunt.log.writeln( 'Committing to assets');
-	
-								cmd = "cd "+svnpath+"/assets; pwd;";
-								cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
-								cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
-								cmd += 'cd '+svnpath+'/assets\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"';
-								var cmd = exec( cmd,{}, function(error, stdout, stderr) {
-									if (error !== null) {
-										grunt.fail.warn( 'Failed to commit to assets: ' + error );
-									}
-								} );
-							}
+
 
 							//Commit to trunk
 							grunt.log.writeln( 'Committing to trunk');
@@ -183,7 +169,24 @@ module.exports = function(grunt) {
 										if (error !== null) {
 											grunt.fail.warn( 'Failed to comit tag: ' + error );
 										}
-										done();
+										
+										//Commit assets
+										if( options.assets_dir ){
+											grunt.log.writeln( 'Committing to assets');
+		
+											cmd = "cd "+svnpath+"/assets; pwd;";
+											cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
+											cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
+											cmd += 'cd '+svnpath+'/assets\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"';
+											var cmd = exec( cmd,{}, function(error, stdout, stderr) {
+												if (error !== null) {
+													grunt.fail.warn( 'Failed to commit to assets: ' + error );
+												}
+												done();
+											} );
+										}else{
+											done();
+										}
 									});
 								}); //Copy to  tag
 
