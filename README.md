@@ -81,10 +81,21 @@ Default value: `http://plugins.svn.wordpress.org/{plugin-slug}`
 
 For flexibilty this plug-in can work with other repos. Simple provide the SVN url, using `{plugin-slug}` as placeholder indicating where the plug-in slug should be.
 
+#### options.max_buffer
+Type: `Integer`
+Default value: `200*1024`
+
+Sets the maximum buffer for the SVN checkout of the repo. 
+
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
+
+### 1.0.2 - 4th September 2014
+- Fixes bug where files in sub directory are missed
+- Fixes bug where assets/build directory are not given a trailing slash
+- Adds max_buffer option for SVN checkout
 
 ### 1.0.1 - 17th August 2014
 - Run assets after commiting to trunk/tag has complete. Fixes SVN E155037 error.
