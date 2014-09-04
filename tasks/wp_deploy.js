@@ -27,6 +27,7 @@ module.exports = function(grunt) {
 			plugin_slug: false,
 			build_dir: false,
 			assets_dir: false,
+			max_buffer: 200*1024,
 		});
 
 		var pkg = grunt.file.readJSON('package.json');
@@ -94,7 +95,7 @@ module.exports = function(grunt) {
 
 			//Check out SVN repo
 			grunt.log.writeln( 'Checking out '+ svnurl );
-			cmd = exec( 'svn co '+svnurl+ ' ' + svnpath, {}, function (error, stdout, stderr) {
+			cmd = exec( 'svn co '+svnurl+ ' ' + svnpath, { maxBuffer: max_buffer }, function (error, stdout, stderr) {
 
 				if (error !== null) {
 					grunt.fail.fatal( 'Checkout of "'+svnurl+'"unsuccessful: ' + error);
