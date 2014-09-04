@@ -239,6 +239,11 @@ module.exports = function(grunt) {
 
 	var copyDirectory = function( src_dir, dest_dir ){
 
+		//Ensure directory has trailingslash
+		if ( src_dir.substr(-1) != '/' ) {
+			src_dir = src_dir + '/';
+		}
+
 		grunt.file.expand(  { 'expand': true, 'cwd' : src_dir }, '**/*' ).forEach( function( src ){
 			var dest = unixifyPath(path.join( dest_dir, src));
 			if ( grunt.file.isDir( src_dir + src ) ) {
