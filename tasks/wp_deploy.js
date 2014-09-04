@@ -238,7 +238,8 @@ module.exports = function(grunt) {
 	};
 
 	var copyDirectory = function( src_dir, dest_dir ){
-		grunt.file.expand(  { 'expand': true, 'cwd' : src_dir }, '*' ).forEach( function( src ){
+
+		grunt.file.expand(  { 'expand': true, 'cwd' : src_dir }, '**/*' ).forEach( function( src ){
 			var dest = unixifyPath(path.join( dest_dir, src));
 			if ( grunt.file.isDir( src_dir + src ) ) {
 				grunt.file.mkdir( dest);
