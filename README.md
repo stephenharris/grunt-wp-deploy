@@ -92,6 +92,9 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### 1.0.3 - 5th September 2014
+- Fixed bug with undefined max_buffer option. Thanks to @tamarazuk.
+
 ### 1.0.2 - 4th September 2014
 - Fixes bug where files in sub directory are missed
 - Fixes bug where assets/build directory are not given a trailing slash
