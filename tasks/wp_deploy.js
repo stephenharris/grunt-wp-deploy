@@ -27,6 +27,7 @@ module.exports = function(grunt) {
 			plugin_slug: false,
 			build_dir: false,
 			assets_dir: false,
+			tmp_dir: "/tmp/",
 			max_buffer: 200*1024,
 		});
 
@@ -54,8 +55,8 @@ module.exports = function(grunt) {
 			//Set up slug, main file, readme file and paths.
 			var slug = options.plugin_slug;
 
-			var svnpath = "/tmp/" + slug;
-			var build_dir = options.build_dir.replace(/\/?$/, '/'); //trailing slash
+			var svnpath     = options.tmp_dir.replace(/\/?$/, '/') + slug;
+			var build_dir   = options.build_dir.replace(/\/?$/, '/'); //trailing slash
 			var plugin_file = build_dir + slug+".php";
 			var readme_file = build_dir + "readme.txt";
 
