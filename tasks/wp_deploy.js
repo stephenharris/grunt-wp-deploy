@@ -27,6 +27,7 @@ module.exports = function(grunt) {
 			plugin_slug: false,
 			build_dir: false,
 			assets_dir: false,
+			tmp_dir: "/tmp/",
 			max_buffer: 200*1024,
 		});
 
@@ -54,8 +55,8 @@ module.exports = function(grunt) {
 			//Set up slug, main file, readme file and paths.
 			var slug = options.plugin_slug;
 
-			var svnpath = "/tmp/" + slug;
-			var build_dir = options.build_dir.replace(/\/?$/, '/'); //trailing slash
+			var svnpath     = options.tmp_dir.replace(/\/?$/, '/') + slug;
+			var build_dir   = options.build_dir.replace(/\/?$/, '/'); //trailing slash
 			var plugin_file = build_dir + slug+".php";
 			var readme_file = build_dir + "readme.txt";
 
@@ -88,23 +89,25 @@ module.exports = function(grunt) {
 
 			//Set some varaibles
 			var new_version = pluginVersion[1];
-			var commitmsg = "Tagging "+new_version;
+			var trunkCommitMsg = "Committing " + new_version + " to trunk";
+			var tagCommitMsg   = "Tagging " + new_version;
+			var assetCommitMsg = "Committing assets for " + new_version;
 
 			//Clean up temp dir
 			cmd = exec( 'rm -fr '+svnpath );
 
 			//Check out SVN repo
-			grunt.log.writeln( 'Checking out '+ svnurl );
+			grunt.log.writeln( 'Checking out '+ svnurl+ '...' );
 			cmd = exec( 'svn co '+svnurl+ ' ' + svnpath, { maxBuffer: options.max_buffer }, function (error, stdout, stderr) {
 
 				if (error !== null) {
 					grunt.fail.fatal( 'Checkout of "'+svnurl+'"unsuccessful: ' + error);
 				}
 
-				grunt.log.writeln(stdout);			
-				grunt.log.writeln(stderr);
+				grunt.verbose.writeln( stdout );			
+				grunt.verbose.writeln( stderr );
 
-				grunt.log.writeln( 'Check out complete.');
+				grunt.log.writeln( 'Check out complete.' + "\n" );
 
 				if( grunt.file.exists(  svnpath+"/tags/"+new_version) ){
 					grunt.fail.warn( 'Tag ' + new_version + ' already exists');
@@ -134,7 +137,7 @@ module.exports = function(grunt) {
 					{
 						type: "confirm",
 						name: "are_you_sure",
-						message: 'Are you sure you want to commit "'+ new_version+'"?'
+						message: "\n" + "Are you sure you want to commit '" + new_version + "'?"
 					}], function( answers ) {
 	
 						if( !answers.are_you_sure ){
@@ -151,34 +154,37 @@ module.exports = function(grunt) {
 
 
 							//Commit to trunk
-							grunt.log.writeln( 'Committing to trunk');
-							var cmd = exec( 'cd '+svnpath+'/trunk\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"',{}, function(error, stdout, stderr) {
+							grunt.log.writeln( "\n" + trunkCommitMsg + "\n" );
+							var cmd = exec( 'cd '+svnpath+'/trunk\n svn commit --force-interactive --username="'+svnuser+'" -m "'+trunkCommitMsg+'"',{}, function(error, stdout, stderr) {
 	
 								if (error !== null) {
 									grunt.fail.warn( 'Failed to commit to trunk: ' + error );
 								}
 
 								//Copy to tag
-								grunt.log.writeln( 'Copying to tag');
+								grunt.log.writeln( 'Copying ' + new_version + 'to tag');
 								var cmd = exec( "cd "+svnpath+"\n svn copy trunk/ tags/"+new_version, {}, function( error, stdout, stderr) {
 									if (error !== null) {
 										grunt.fail.warn( 'Failed to copy to tag: ' + error );
 									}
 									//Commit tag
-									grunt.log.writeln( 'Committing tag');
-									var cmd = exec( 'cd '+svnpath+'/tags/'+new_version+'\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"', {}, function( error, stdout, stderr) {
+									grunt.log.writeln( tagCommitMsg + "\n" );
+									var cmd = exec( 'cd '+svnpath+'/tags/'+new_version+'\n svn commit --force-interactive --username="'+svnuser+'" -m "'+tagCommitMsg+'"', {}, function( error, stdout, stderr) {
+									
 										if (error !== null) {
 											grunt.fail.warn( 'Failed to comit tag: ' + error );
 										}
 										
 										//Commit assets
 										if( options.assets_dir ){
-											grunt.log.writeln( 'Committing to assets');
+											
+											grunt.log.writeln( assetCommitMsg + "\n" );
 		
 											cmd = "cd "+svnpath+"/assets; pwd;";
 											cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
 											cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
-											cmd += 'cd '+svnpath+'/assets\n svn commit --username="'+svnuser+'" -m "'+commitmsg+'"';
+											cmd += 'cd '+svnpath+'/assets\n svn commit --force-interactive --username="'+svnuser+'" -m "'+assetCommitMsg+'"';
+											
 											var cmd = exec( cmd,{}, function(error, stdout, stderr) {
 												if (error !== null) {
 													grunt.fail.warn( 'Failed to commit to assets: ' + error );
