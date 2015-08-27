@@ -55,6 +55,12 @@ Default value: `false`
 
 Your plug-in's slug as indicated by its repository url *http://wordpress.org/plugins/{plugin-slug}*
 
+#### options.plugin_main_file
+Type: `String`
+Default value: `false`
+
+Use this option if the name of your plug-in's main file (the PHP file with WordPress plugin headers) differs from the slug name. Pass the full file name with extension, e.g.: *my-plugin.php*
+
 #### options.svn_user
 Type: `String`
 Default value: `false`
