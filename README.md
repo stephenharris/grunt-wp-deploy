@@ -55,6 +55,12 @@ Default value: `false`
 
 Your plug-in's slug as indicated by its repository url *http://wordpress.org/plugins/{plugin-slug}*
 
+#### options.plugin_main_file
+Type: `String`
+Default value: `false`
+
+Use this option if the name of your plug-in's main file (the PHP file with WordPress plugin headers) differs from the slug name. Pass the full file name with extension, e.g.: *my-plugin.php*
+
 #### options.svn_user
 Type: `String`
 Default value: `false`
@@ -87,10 +93,22 @@ Default value: `200*1024`
 
 Sets the maximum buffer for the SVN checkout of the repo. 
 
+#### options.tmp_dir
+Type: `String`
+Default value: `/tmp/`
+
+Location where your SVN repository is checked out to. **Note:** Before the the repository is checked out `<tmp_dir>/<plugin_slug>` is deleted.
+
+
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
+
+### 1.1.0 - 20th July 2015
+- Add --force-interactive to request password if it is not know. Fixes [#15](https://github.com/stephenharris/grunt-wp-deploy/issues/15)
+- Set seperate message for trunk/tag/asset commits. Make logs more verbose. Ref [#10](https://github.com/stephenharris/grunt-wp-deploy/issues/10)
+- Add option (`tmp_dir`) for specifying the temporary directory to checkout the SVN repository to
 
 ### 1.0.3 - 5th September 2014
 - Fixed bug with undefined max_buffer option. Thanks to @tamarazuk.
