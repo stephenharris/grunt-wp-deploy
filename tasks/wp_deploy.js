@@ -162,7 +162,7 @@ module.exports = function(grunt) {
 								}
 
 								//Copy to tag
-								grunt.log.writeln( 'Copying ' + new_version + 'to tag');
+								grunt.log.writeln( 'Copying ' + new_version + ' to tag');
 								var cmd = exec( "cd "+svnpath+"\n svn copy trunk/ tags/"+new_version, {}, function( error, stdout, stderr) {
 									if (error !== null) {
 										grunt.fail.warn( 'Failed to copy to tag: ' + error );
