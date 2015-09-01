@@ -19,11 +19,12 @@ module.exports = function(grunt) {
 	grunt.registerMultiTask('wp_deploy', 'Deploys a git Repo to the WordPress SVN repo', function() {
 
 		var done = this.async();
-		var cmd;	
+		var cmd;
 
 		var options = this.options({
 			svn_url: "http://plugins.svn.wordpress.org/{plugin-slug}",
 			svn_user: false,
+			plugin_main_file: false,
 			plugin_slug: false,
 			build_dir: false,
 			assets_dir: false,
@@ -51,17 +52,22 @@ module.exports = function(grunt) {
 		}
 
 		inquirer.prompt( questions, function( answers ) {
-		
+
 			//Set up slug, main file, readme file and paths.
 			var slug = options.plugin_slug;
 
+			if ( options.plugin_main_file ) {
+				var plugin_file = build_dir + options.plugin_main_file;
+			} else {
+				var plugin_file = build_dir + slug + ".php";
+			}
+
 			var svnpath     = options.tmp_dir.replace(/\/?$/, '/') + slug;
 			var build_dir   = options.build_dir.replace(/\/?$/, '/'); //trailing slash
-			var plugin_file = build_dir + slug+".php";
 			var readme_file = build_dir + "readme.txt";
 
 			//SVN user/url
-			var svnuser = options.svn_user || answers.svn_username; 
+			var svnuser = options.svn_user || answers.svn_username;
 			var svnurl = options.svn_url.replace( '{plugin-slug}', slug );
 
 			//Try to find readme
@@ -84,7 +90,7 @@ module.exports = function(grunt) {
 			if(  projectVersionCompare( pluginVersion[1],  readmeVersion[1] )  !== 0 ){
 				grunt.log.warn( "Readme.txt version: " + readmeVersion[1] );
 				grunt.log.warn( slug+".php version: " + pluginVersion[1] );
-				grunt.fail.warn( 'Versions do not match:');	
+				grunt.fail.warn( 'Versions do not match:');
 			}
 
 			//Set some varaibles
@@ -104,7 +110,7 @@ module.exports = function(grunt) {
 					grunt.fail.fatal( 'Checkout of "'+svnurl+'"unsuccessful: ' + error);
 				}
 
-				grunt.verbose.writeln( stdout );			
+				grunt.verbose.writeln( stdout );
 				grunt.verbose.writeln( stderr );
 
 				grunt.log.writeln( 'Check out complete.' + "\n" );
@@ -139,24 +145,24 @@ module.exports = function(grunt) {
 						name: "are_you_sure",
 						message: "\n" + "Are you sure you want to commit '" + new_version + "'?"
 					}], function( answers ) {
-	
+
 						if( !answers.are_you_sure ){
 							grunt.log.writeln( 'Aborting...' );
 							return;
 						}
-		
+
 						//(SVN) Add all new files that are not set to be ignored
 						cmd = "cd "+svnpath+"/trunk; pwd;";
 						cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
 						cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
-	
+
 						cmd = exec(cmd,{}, function( a, b, c ){
 
 
 							//Commit to trunk
 							grunt.log.writeln( "\n" + trunkCommitMsg + "\n" );
 							var cmd = exec( 'cd '+svnpath+'/trunk\n svn commit --force-interactive --username="'+svnuser+'" -m "'+trunkCommitMsg+'"',{}, function(error, stdout, stderr) {
-	
+
 								if (error !== null) {
 									grunt.fail.warn( 'Failed to commit to trunk: ' + error );
 								}
@@ -170,21 +176,21 @@ module.exports = function(grunt) {
 									//Commit tag
 									grunt.log.writeln( tagCommitMsg + "\n" );
 									var cmd = exec( 'cd '+svnpath+'/tags/'+new_version+'\n svn commit --force-interactive --username="'+svnuser+'" -m "'+tagCommitMsg+'"', {}, function( error, stdout, stderr) {
-									
+
 										if (error !== null) {
 											grunt.fail.warn( 'Failed to comit tag: ' + error );
 										}
-										
+
 										//Commit assets
 										if( options.assets_dir ){
-											
+
 											grunt.log.writeln( assetCommitMsg + "\n" );
-		
+
 											cmd = "cd "+svnpath+"/assets; pwd;";
 											cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
 											cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
 											cmd += 'cd '+svnpath+'/assets\n svn commit --force-interactive --username="'+svnuser+'" -m "'+assetCommitMsg+'"';
-											
+
 											var cmd = exec( cmd,{}, function(error, stdout, stderr) {
 												if (error !== null) {
 													grunt.fail.warn( 'Failed to commit to assets: ' + error );
@@ -207,7 +213,7 @@ module.exports = function(grunt) {
 
 		});//Initial questions
 
-	}); //Register 
+	}); //Register
 
 	//Compares version numbers
 	var projectVersionCompare = function(left, right) {
@@ -222,8 +228,8 @@ module.exports = function(grunt) {
 			} else if ((b[i] && !a[i] && parseInt(b[i], 10) > 0) || (parseInt(a[i], 10) < parseInt(b[i], 10))) {
 				return -1;
 			}
-		}	
-	
+		}
+
 		return 0;
    	};
 
