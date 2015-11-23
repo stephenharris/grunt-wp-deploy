@@ -10,8 +10,6 @@
 
 module.exports = function(grunt) {
 
-	var exec = require('child_process').exec;
-	var execSync = require('child_process').execSync;
 	var process = require('process');
 	var inquirer = require('inquirer');
 	var path = require('path');
@@ -102,123 +100,140 @@ module.exports = function(grunt) {
 			var assetCommitMsg = "Committing assets for " + new_version;
 
 			//Clean up temp dir
-			cmd = execSync( 'rm -fr '+svnpath );
+			var result = execCommand( 'rm -fr '+svnpath, {} );
+			if ( result !== null ) {
+				grunt.fail.fatal( 'Error during temp dir clean up: ' + result );
+			}
 
 			//Check out SVN repo
 			grunt.log.writeln( 'Checking out '+ svnurl+ '...' );
-			cmd = exec( 'svn co '+svnurl+ ' ' + svnpath + ' --username="'+svnuser, { maxBuffer: options.max_buffer }, function (error, stdout, stderr) {
+			result = execCommand( 'svn co '+svnurl+ ' ' + svnpath + ' --username='+svnuser, { maxBuffer: options.max_buffer });
+			if ( result !== null ) {
+				grunt.fail.fatal( 'Checkout of "'+svnurl+'" unsuccessful: ' + result );
+			}
+			grunt.log.writeln( 'Check out complete.' + "\n" );
 
-				if (error !== null) {
-					grunt.fail.fatal( 'Checkout of "'+svnurl+'"unsuccessful: ' + error);
-				}
+			//Check existence of Tagged version
+			if ( grunt.file.exists(  svnpath+"/tags/"+new_version ) ){
+				grunt.fail.warn( 'Tag ' + new_version + ' already exists' );
+			}
 
-				grunt.verbose.writeln( stdout );
-				grunt.verbose.writeln( stderr );
+			//Clearing trunk
+			grunt.log.writeln( 'Clearing trunk.');
+			result = execCommand( 'rm -fr '+svnpath+"/trunk/*", {} );
+			if ( result !== null ) {
+				grunt.fail.fatal( 'Error during trunk clean up: ' + result );
+			}
 
-				grunt.log.writeln( 'Check out complete.' + "\n" );
+			//Ignore specific files
+			//grunt.log.writeln( 'Ignoring github specific files and deployment script.' );
+			result = execCommand( 'svn propset svn:ignore "deploy.sh readme.md .git .gitignore" "'+svnpath+'/trunk/"', {} );
+			if ( result !== null ) {
+				grunt.fail.fatal( 'Error on ignoring specific files: ' + result );
+			}
 
-				if( grunt.file.exists(  svnpath+"/tags/"+new_version) ){
-					grunt.fail.warn( 'Tag ' + new_version + ' already exists');
-				}
+			//Copying build to temporary directory
+			grunt.log.writeln( 'Copying build directory: ' + build_dir + ' to ' + svnpath+'/trunk/');
+			copyDirectory( build_dir, svnpath+"/trunk/" );
 
-				//Clearing trunk
-				grunt.log.writeln( 'Clearing trunk.');
-				execSync( 'rm -fr '+svnpath+"/trunk/*" );
+			//If the assets folder is provided, copy this into assets
+			if( options.assets_dir ){
+				var assets_dir = options.assets_dir.replace(/\/?$/, '/'); //trailing slash
+				grunt.log.writeln( 'Copying assets directory: ' + options.assets_dir + ' to ' + svnpath+'/assets/');
+				copyDirectory( options.assets_dir, svnpath+"/assets/" );
+			}
+			
+			//Lets ask for confirmation before commit stuff
+			inquirer.prompt( [
+				{
+					type: "confirm",
+					name: "are_you_sure",
+					message: "\n" + "Are you sure you want to commit '" + new_version + "'?"
+				}], function( answers ) {
 
-				//grunt.log.writeln( 'Ignoring github specific files and deployment script.');
-				execSync( 'svn propset svn:ignore "deploy.sh readme.md .git .gitignore" "'+svnpath+'/trunk/"' );
+					if( !answers.are_you_sure ){
+						grunt.log.writeln( 'Aborting...' );
+						return;
+					}
 
-				//Copying build to temporary directory
-				grunt.log.writeln( 'Copying build directory: ' + build_dir + ' to ' + svnpath+'/trunk/');
-				copyDirectory( build_dir, svnpath+"/trunk/" );
+					//(SVN) Add new files that are not set to be ignored
+					var result = execCommand( "svn status | " + awk + " '/^[?]/{print $2}' | xargs --no-run-if-empty svn add", {cwd: svnpath+'/trunk/'} );
+					if ( result !== null ) {
+						grunt.fail.warn( 'Error adding new files: ' + result );
+					}
+					
+					//(SVN) Remove missing files
+					result = execCommand( "svn status | " + awk + " '/^[!]/{print $2}' | xargs --no-run-if-empty svn delete", {cwd: svnpath+'/trunk/'} );
+					if ( result !== null ) {
+						grunt.fail.warn( 'Error removing missing files: ' + result );
+					}
+				
+					//Commit to trunk
+					grunt.log.writeln( "\n" + trunkCommitMsg + "\n" );
+					result = execCommand( 'svn commit --force-interactive --username="'+svnuser+'" -m "'+trunkCommitMsg+'"', {cwd: svnpath+'/trunk'} );
+					if ( result !== null ) {
+						grunt.fail.fatal( 'Failed to commit to trunk: ' + result );
+					}
 
+					//Copy to tag
+					grunt.log.writeln( 'Copying ' + new_version + ' to tag');
+					result = execCommand( "svn copy trunk/ tags/"+new_version, {cwd: svnpath} );
+					if ( result !== null) {
+						grunt.fail.warn( 'Failed to copy to tag: ' + result );
+					}
+					
+					//Commit tag
+					grunt.log.writeln( tagCommitMsg + "\n" );
+					result = execCommand( 'svn commit --force-interactive --username="'+svnuser+'" -m "'+tagCommitMsg+'"', {cwd: svnpath+'/tags/'+new_version} );
+					if ( result !== null ) {
+						grunt.fail.warn( 'Failed to commit tag: ' + result );
+					}
 
-				//If the assets folder is provided, copy this into assets
-				if( options.assets_dir ){
-					var assets_dir = options.assets_dir.replace(/\/?$/, '/'); //trailing slash
-					grunt.log.writeln( 'Copying assets directory: ' + options.assets_dir + ' to ' + svnpath+'/assets/');
-					copyDirectory( options.assets_dir, svnpath+"/assets/" );
-				}
-
-				//Lets ask for confirmation before commit stuff
-				inquirer.prompt( [
-					{
-						type: "confirm",
-						name: "are_you_sure",
-						message: "\n" + "Are you sure you want to commit '" + new_version + "'?"
-					}], function( answers ) {
-
-						if( !answers.are_you_sure ){
-							grunt.log.writeln( 'Aborting...' );
-							return;
+					//Assets
+					if( options.assets_dir ){
+						grunt.log.writeln( assetCommitMsg + "\n" );
+	
+						//(SVN) Add new files that are not set to be ignored
+						result = execCommand( "svn status | " + awk + " '/^[?]/{print $2}' | xargs --no-run-if-empty svn add", {cwd: svnpath+'/assets/'} );
+						if ( result !== null ) {
+							grunt.fail.warn( 'Error adding new files to assets: ' + result );
 						}
 
-						//(SVN) Add all new files that are not set to be ignored
-						var cmd_add = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | " + awk + " '{print $2}' | xargs svn add"; //Add new files
-						var cmd_del = "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | " + awk + " '{print $2}' | xargs svn delete"; //Remove missing files
-						
-						grunt.log.writeln( execSync( cmd_add,{cwd: svnpath+'/trunk/'}) );
+						//(SVN) Remove missing files
+						result = execCommand( "svn status | " + awk + " '/^[!]/{print $2}' | xargs --no-run-if-empty svn delete", {cwd: svnpath+'/assets/'} );
+						if ( result !== null ) {
+							grunt.fail.warn( 'Error removing missing files from assets: ' + result );
+						}
 
-						cmd = exec(cmd_del,{cwd: svnpath+'/trunk/'}, function( a, b, c ){
+						//Commit assets
+						result = execCommand( 'svn commit --force-interactive --username="'+svnuser+'" -m "'+assetCommitMsg+'"', {cwd: svnpath+'/assets'} );
+						if ( result !== null ) {
+							grunt.fail.warn( 'Failed to commit to assets: ' + result );
+						}
 
+					}// Assets 
 
-							//Commit to trunk
-							grunt.log.writeln( "\n" + trunkCommitMsg + "\n" );
-							var cmd = exec( 'svn commit --force-interactive --username="'+svnuser+'" -m "'+trunkCommitMsg+'"',{cwd: svnpath+'/trunk'}, function(error, stdout, stderr) {
-
-								if (error !== null) {
-									grunt.fail.warn( 'Failed to commit to trunk: ' + error );
-								}
-
-								//Copy to tag
-								grunt.log.writeln( 'Copying ' + new_version + ' to tag');
-								var cmd = exec( "svn copy trunk/ tags/"+new_version, {cwd: svnpath}, function( error, stdout, stderr) {
-									if (error !== null) {
-										grunt.fail.warn( 'Failed to copy to tag: ' + error );
-									}
-									//Commit tag
-									grunt.log.writeln( tagCommitMsg + "\n" );
-									var cmd = exec( 'svn commit --force-interactive --username="'+svnuser+'" -m "'+tagCommitMsg+'"', {cwd: svnpath+'/tags/'+new_version}, function( error, stdout, stderr) {
-
-										if (error !== null) {
-											grunt.fail.warn( 'Failed to comit tag: ' + error );
-										}
-
-										//Commit assets
-										if( options.assets_dir ){
-
-											grunt.log.writeln( assetCommitMsg + "\n" );
-
-											var cmd_add = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | " + awk + " '{print $2}' | xargs svn add"; //Add new files
-											var cmd_del = "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | " + awk + " '{print $2}' | xargs svn delete"; //Remove missing files
-											var cmd_com = 'svn commit --force-interactive --username="'+svnuser+'" -m "'+assetCommitMsg+'"';
-											
-											execSync(cmd_add, {cwd: svnpath+'/assets/'});
-											execSync(cmd_del, {cwd: svnpath+'/assets/'});
-
-											var cmd = exec( cmd_com,{cwd: svnpath+'/assets'}, function(error, stdout, stderr) {
-												if (error !== null) {
-													grunt.fail.warn( 'Failed to commit to assets: ' + error );
-												}
-												done();
-											} );
-										}else{
-											done();
-										}
-									});
-								}); //Copy to  tag
-
-							} );//Commit to trunk
-
-						});//(SVN) Add files
-
-				});//Confirmation
-
-			}); //SVN Checkout
+			});//Confirmation
 
 		});//Initial questions
 
 	}); //Register
+	
+	//Execute external commands - Return null in case of success, otherwise return an error
+	var execCommand = function( cmd, opt ) {
+		try {
+			grunt.verbose.writeln( 'Executing "' + cmd + '"');
+			var output = require('child_process').execSync( cmd, opt );
+			grunt.verbose.writeln( output );
+			return null;
+		}
+		catch ( Error ) {
+			grunt.verbose.writeln( 'Error executing "' + cmd + '": ' + Error.stderr );
+			grunt.verbose.writeln( Error.stdout );
+			grunt.verbose.writeln( Error.error );
+			return Error.error;
+		}
+	}
 
 	//Compares version numbers
 	var projectVersionCompare = function(left, right) {
