@@ -237,21 +237,6 @@ module.exports = function(grunt) {
 		});//Initial questions
 
 	}); //Register
-
-	// Commit trunk to SVN repository
-	var commitTrunk = function( svnpath, svnuser, commitMessage ) {
-
-	};
-	
-	// Tag release in SVN repository
-	var tagRelease = function( svnpath, svnuser, commitMessage, new_version ) {
-
-	};
-	
-	// Commit assets to SVN repository
-	var commitAssets = function( svnpath, svnuser, commitMessage ) {
-
-	};
 	
 	//Compares version numbers
 	var projectVersionCompare = function(left, right) {
