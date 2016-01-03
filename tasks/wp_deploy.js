@@ -124,8 +124,8 @@ module.exports = function(grunt) {
 
 				grunt.log.writeln( 'Check out complete.' + "\n" );
 
-				if( grunt.file.exists(  svnpath+"/tags/"+new_version) ){
-					grunt.fail.warn( 'Tag ' + new_version + ' already exists');
+				if ( options.deploy_release && grunt.file.exists(  svnpath+"/tags/"+new_version ) ) {
+					grunt.fail.warn( 'Tag ' + new_version + ' already exists' );
 				}
 
 				//Clearing trunk
