@@ -14,6 +14,7 @@ module.exports = function(grunt) {
 	var inquirer = require('inquirer');
 	var async = require('async');
 	var path = require('path');
+	var awk = process.platform === 'win32'? 'gawk' : 'awk';
 
 	// Please see the Grunt documentation for more information regarding task
 	// creation: http://gruntjs.com/creating-tasks
@@ -190,8 +191,8 @@ module.exports = function(grunt) {
 	};
 
 	var addFiles = function( ctxt, callback ) {
-		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
-		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
+		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | " + awk + " '{print $2}' | xargs svn add;"; //Add new files
+		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | " + awk + " '{print $2}' | xargs svn delete;"; //Remove missing files
 		exec(cmd,{cwd: ctxt.svnpath+"/trunk"}, function( a, b, c ){
 			callback( null, ctxt );
 		});
@@ -235,8 +236,8 @@ module.exports = function(grunt) {
 		var assetCommitMsg = "Committing assets for " + ctxt.new_version;
 		grunt.log.writeln( assetCommitMsg + "\n" );
 
-		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
-		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
+		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | " + awk + " '{print $2}' | xargs svn add;"; //Add new files
+		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | " + awk + " '{print $2}' | xargs svn delete;"; //Remove missing files
 		cmd += 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+assetCommitMsg+'"';
 
 		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
