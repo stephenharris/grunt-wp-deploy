@@ -1,0 +1,15 @@
+language: js
+
+node_js:
+- "0.10"
+
+sudo: false
+
+install:
+- npm install grunt-cli
+- npm install
+  
+script: 
+- node_modules/grunt-cli/bin/grunt test
+
+

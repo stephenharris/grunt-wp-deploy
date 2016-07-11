@@ -12,6 +12,7 @@ module.exports = function(grunt) {
 
 	var exec = require('child_process').exec;
 	var inquirer = require('inquirer');
+	var async = require('async');
 	var path = require('path');
 
 	// Please see the Grunt documentation for more information regarding task
@@ -19,7 +20,6 @@ module.exports = function(grunt) {
 	grunt.registerMultiTask('wp_deploy', 'Deploys a git Repo to the WordPress SVN repo', function() {
 
 		var done = this.async();
-		var cmd;
 
 		var options = this.options({
 			svn_url: "http://plugins.svn.wordpress.org/{plugin-slug}",
@@ -30,10 +30,10 @@ module.exports = function(grunt) {
 			assets_dir: false,
 			tmp_dir: "/tmp/",
 			max_buffer: 200*1024,
+			skip_confirmation: false
 		});
 
 		var pkg = grunt.file.readJSON('package.json');
-		var questions = [];
 
 		if( !options.plugin_slug ){
 			grunt.fail.fatal( "Plug-in slug not provided" );
@@ -43,6 +43,7 @@ module.exports = function(grunt) {
 			grunt.fail.fatal( "Build directory not provided" );
 		}
 
+		var questions = [];
 		if( !options.svn_user ){
 			questions.push({
 				type: "input",
@@ -54,17 +55,17 @@ module.exports = function(grunt) {
 		inquirer.prompt( questions, function( answers ) {
 
 			//Set up slug, main file, readme file and paths.
-			var slug = options.plugin_slug;
-
-			if ( options.plugin_main_file ) {
-				var plugin_file = build_dir + options.plugin_main_file;
-			} else {
-				var plugin_file = build_dir + slug + ".php";
-			}
+			var slug = options.plugin_slug, plugin_file;
 
 			var svnpath     = options.tmp_dir.replace(/\/?$/, '/') + slug;
 			var build_dir   = options.build_dir.replace(/\/?$/, '/'); //trailing slash
 			var readme_file = build_dir + "readme.txt";
+
+			if ( options.plugin_main_file ) {
+				plugin_file = build_dir + options.plugin_main_file;
+			} else {
+				plugin_file = build_dir + slug + ".php";
+			}
 
 			//SVN user/url
 			var svnuser = options.svn_user || answers.svn_username;
@@ -93,127 +94,156 @@ module.exports = function(grunt) {
 				grunt.fail.warn( 'Versions do not match:');
 			}
 
-			//Set some varaibles
-			var new_version = pluginVersion[1];
-			var trunkCommitMsg = "Committing " + new_version + " to trunk";
-			var tagCommitMsg   = "Tagging " + new_version;
-			var assetCommitMsg = "Committing assets for " + new_version;
+			var ctxt = {
+				new_version: pluginVersion[1],
+				svnurl: svnurl,
+				svnuser: svnuser,
+				svnpath: svnpath,
+				max_buffer: options.max_buffer,
+				build_dir: build_dir,
+				assets_dir: options.assets_dir
+			};
+
+			var steps = [
+				function( callback ) {
+					callback( null, ctxt );
+				},
+				checkOut,
+				clearTrunk,
+				copyBuild,
+				options.assets_dir ? copyAssets : null,
+				options.skip_confirmation ? null : confirmation,
+				addFiles,
+				commitToTrunk,
+				copyToTag,
+				commitTag,
+				options.assets_dir ? commitAssets : null
+			].filter(function(val) { return val !== null; });
 
 			//Clean up temp dir
-			cmd = exec( 'rm -fr '+svnpath );
+			exec( 'rm -fr '+svnpath );
 
-			//Check out SVN repo
-			grunt.log.writeln( 'Checking out '+ svnurl+ '...' );
-			cmd = exec( 'svn co '+svnurl+ ' ' + svnpath, { maxBuffer: options.max_buffer }, function (error, stdout, stderr) {
+			async.waterfall( steps, function (err, result){
+				done();
+			});
 
-				if (error !== null) {
-					grunt.fail.fatal( 'Checkout of "'+svnurl+'"unsuccessful: ' + error);
-				}
-
-				grunt.verbose.writeln( stdout );
-				grunt.verbose.writeln( stderr );
-
-				grunt.log.writeln( 'Check out complete.' + "\n" );
-
-				if( grunt.file.exists(  svnpath+"/tags/"+new_version) ){
-					grunt.fail.warn( 'Tag ' + new_version + ' already exists');
-				}
-
-				//Clearing trunk
-				grunt.log.writeln( 'Clearing trunk.');
-				exec( 'rm -fr '+svnpath+"/trunk/*" );
-
-				//grunt.log.writeln( 'Ignoring github specific files and deployment script.');
-				exec( 'svn propset svn:ignore "deploy.sh readme.md .git .gitignore" "'+svnpath+'/trunk/"' );
-
-				//Copying build to temporary directory
-				grunt.log.writeln( 'Copying build directory: ' + build_dir + ' to ' + svnpath+'/trunk/');
-				copyDirectory( build_dir, svnpath+"/trunk/" );
-
-
-				//If the assets folder is provided, copy this into assets
-				if( options.assets_dir ){
-					var assets_dir = options.assets_dir.replace(/\/?$/, '/'); //trailing slash
-					grunt.log.writeln( 'Copying assets directory: ' + options.assets_dir + ' to ' + svnpath+'/assets/');
-					copyDirectory( options.assets_dir, svnpath+"/assets/" );
-				}
-
-				//Lets ask for confirmation before commit stuff
-				inquirer.prompt( [
-					{
-						type: "confirm",
-						name: "are_you_sure",
-						message: "\n" + "Are you sure you want to commit '" + new_version + "'?"
-					}], function( answers ) {
-
-						if( !answers.are_you_sure ){
-							grunt.log.writeln( 'Aborting...' );
-							return;
-						}
-
-						//(SVN) Add all new files that are not set to be ignored
-						cmd = "cd "+svnpath+"/trunk; pwd;";
-						cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
-						cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
-
-						cmd = exec(cmd,{}, function( a, b, c ){
-
-
-							//Commit to trunk
-							grunt.log.writeln( "\n" + trunkCommitMsg + "\n" );
-							var cmd = exec( 'cd '+svnpath+'/trunk\n svn commit --force-interactive --username="'+svnuser+'" -m "'+trunkCommitMsg+'"',{}, function(error, stdout, stderr) {
-
-								if (error !== null) {
-									grunt.fail.warn( 'Failed to commit to trunk: ' + error );
-								}
-
-								//Copy to tag
-								grunt.log.writeln( 'Copying ' + new_version + ' to tag');
-								var cmd = exec( "cd "+svnpath+"\n svn copy trunk/ tags/"+new_version, {}, function( error, stdout, stderr) {
-									if (error !== null) {
-										grunt.fail.warn( 'Failed to copy to tag: ' + error );
-									}
-									//Commit tag
-									grunt.log.writeln( tagCommitMsg + "\n" );
-									var cmd = exec( 'cd '+svnpath+'/tags/'+new_version+'\n svn commit --force-interactive --username="'+svnuser+'" -m "'+tagCommitMsg+'"', {}, function( error, stdout, stderr) {
-
-										if (error !== null) {
-											grunt.fail.warn( 'Failed to comit tag: ' + error );
-										}
-
-										//Commit assets
-										if( options.assets_dir ){
-
-											grunt.log.writeln( assetCommitMsg + "\n" );
-
-											cmd = "cd "+svnpath+"/assets; pwd;";
-											cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
-											cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
-											cmd += 'cd '+svnpath+'/assets\n svn commit --force-interactive --username="'+svnuser+'" -m "'+assetCommitMsg+'"';
-
-											var cmd = exec( cmd,{}, function(error, stdout, stderr) {
-												if (error !== null) {
-													grunt.fail.warn( 'Failed to commit to assets: ' + error );
-												}
-												done();
-											} );
-										}else{
-											done();
-										}
-									});
-								}); //Copy to  tag
-
-							} );//Commit to trunk
-
-						});//(SVN) Add files
-
-				});//Confirmation
-
-			}); //SVN Checkout
 
 		});//Initial questions
 
 	}); //Register
+
+	var checkOut = function ( ctxt, callback ) {
+		grunt.log.writeln( 'Checking out '+ ctxt.svnurl+ '...' );
+		exec( 'svn co  --force-interactive '+ctxt.svnurl+ ' ' + ctxt.svnpath, { maxBuffer: ctxt.max_buffer }, function (error, stdout, stderr) {
+			if (error !== null) {
+				grunt.fail.fatal( 'Checkout of "'+ctxt.svnurl+'"unsuccessful: ' + error);
+			}
+
+			grunt.log.writeln( 'Check out complete.' + "\n" );
+
+			if( grunt.file.exists(  ctxt.svnpath+"/tags/"+ctxt.new_version) ){
+				grunt.fail.warn( 'Tag ' + ctxt.new_version + ' already exists');
+			}
+			callback( null, ctxt );
+		});
+	};
+
+	var clearTrunk = function ( ctxt, callback ) {
+		grunt.log.writeln( 'Clearing trunk.');
+		exec( 'rm -fr '+ctxt.svnpath+"/trunk/*", function(){
+			callback( null, ctxt );
+		});
+	};
+
+	var copyBuild = function ( ctxt, callback ) {
+		grunt.log.writeln( 'Copying build directory: ' + ctxt.build_dir + ' to ' + ctxt.svnpath+'/trunk/');
+		copyDirectory( ctxt.build_dir, ctxt.svnpath+"/trunk/", function( ){
+			callback( null, ctxt );
+		} );
+	};
+
+	var copyAssets = function ( ctxt, callback ) {
+		var assets_dir = ctxt.assets_dir.replace(/\/?$/, '/'); //trailing slash
+		grunt.log.writeln( 'Copying assets directory: ' + assets_dir + ' to ' + ctxt.svnpath+'/assets/');
+		copyDirectory( assets_dir, ctxt.svnpath+"/assets/", function( ){
+			callback( null, ctxt );
+		} );
+	};
+
+	var confirmation = function( ctxt, callback ) {
+		inquirer.prompt( [
+			{
+				type: "confirm",
+				name: "are_you_sure",
+				message: "\n" + "Are you sure you want to commit '" + ctxt.new_version + "'?"
+			}], 
+			function( answers ) {
+				if( !answers.are_you_sure ){
+					grunt.log.writeln( 'Aborting...' );
+					return;
+				}
+				callback( null, ctxt );
+			}
+		);
+	};
+
+	var addFiles = function( ctxt, callback ) {
+		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
+		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
+		exec(cmd,{cwd: ctxt.svnpath+"/trunk"}, function( a, b, c ){
+			callback( null, ctxt );
+		});
+	};
+
+	var commitToTrunk = function( ctxt, callback ) {
+		var trunkCommitMsg = "Committing " + ctxt.new_version + " to trunk";
+		grunt.log.writeln( "\n" + trunkCommitMsg + "\n" );
+		var cmd = 'svn commit --force-interactive --username="'+ctxt.svnuser+'" -m "'+trunkCommitMsg+'"';
+		exec( cmd, {cwd:ctxt.svnpath+'/trunk'}, function(error, stdout, stderr) {
+			if (error !== null) {
+				grunt.fail.warn( 'Failed to commit to trunk: ' + error );
+			}
+			callback( null, ctxt );
+		});
+	};
+
+	var copyToTag = function( ctxt, callback ) {
+		grunt.log.writeln( 'Copying ' + ctxt.new_version + ' to tag');
+		exec( "svn copy trunk/ tags/"+ctxt.new_version, { cwd: ctxt.svnpath }, function( error, stdout, stderr) {
+			if (error !== null) {
+				grunt.fail.warn( 'Failed to copy to tag: ' + error );
+			}
+			callback( null, ctxt );
+		});
+	};
+
+	var commitTag = function( ctxt, callback ) {
+		var tagCommitMsg   = "Tagging " + ctxt.new_version;
+		grunt.log.writeln( tagCommitMsg + "\n" );
+		var cmd = 'svn commit --force-interactive --username="'+ctxt.svnuser+'" -m "'+tagCommitMsg+'"';
+		exec( cmd , { cwd: ctxt.svnpath+'/tags/'+ctxt.new_version }, function( error, stdout, stderr) {
+			if (error !== null) {
+				grunt.fail.warn( 'Failed to comit tag: ' + error );
+			}
+			callback( null, ctxt );
+		});
+	};
+
+	var commitAssets = function( ctxt, callback ) {
+		var assetCommitMsg = "Committing assets for " + ctxt.new_version;
+		grunt.log.writeln( assetCommitMsg + "\n" );
+
+		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
+		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
+		cmd += 'svn commit --force-interactive --username="'+ctxt.svnuser+'" -m "'+assetCommitMsg+'"';
+
+		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
+			if (error !== null) {
+				grunt.fail.warn( 'Failed to commit to assets: ' + error );
+			}
+			callback( null, ctxt );
+		} );
+	};
 
 	//Compares version numbers
 	var projectVersionCompare = function(left, right) {
@@ -231,7 +261,7 @@ module.exports = function(grunt) {
 		}
 
 		return 0;
-   	};
+	};
 
 
 	var detectDestType = function(dest) {
@@ -250,10 +280,10 @@ module.exports = function(grunt) {
 		}
 	};
 
-	var copyDirectory = function( src_dir, dest_dir ){
+	var copyDirectory = function( src_dir, dest_dir, callback ){
 
 		//Ensure directory has trailingslash
-		if ( src_dir.substr(-1) != '/' ) {
+		if ( src_dir.substr(-1) !== '/' ) {
 			src_dir = src_dir + '/';
 		}
 
@@ -265,5 +295,7 @@ module.exports = function(grunt) {
 				grunt.file.copy( src_dir + src, dest );
 			}
 		});
-	}
+
+		callback();
+	};
 };
