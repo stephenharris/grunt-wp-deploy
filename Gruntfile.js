@@ -72,7 +72,8 @@ module.exports = function(grunt) {
 				skip_confirmation: true,
 				build_dir: 'test/fixtures/first/build', //relative path to your build directory
 				assets_dir: 'test/fixtures/first/assets', //relative path to your assets directory (optional).
-				tmp_dir: 'tmp/checkout'
+				tmp_dir: 'tmp/checkout',
+				force_interactive: false,
 			}
 		},
 		second: { 
@@ -83,7 +84,8 @@ module.exports = function(grunt) {
 				skip_confirmation: true,
 				build_dir: 'test/fixtures/second/build', //relative path to your build directory
 				assets_dir: 'test/fixtures/second/assets', //relative path to your assets directory (optional).
-				tmp_dir: 'tmp/checkout'
+				tmp_dir: 'tmp/checkout',
+				force_interactive: false,
 			}
 		}
     },

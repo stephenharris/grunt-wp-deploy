@@ -30,7 +30,8 @@ module.exports = function(grunt) {
 			assets_dir: false,
 			tmp_dir: "/tmp/",
 			max_buffer: 200*1024,
-			skip_confirmation: false
+			skip_confirmation: false,
+			force_interactive: true,
 		});
 
 		var pkg = grunt.file.readJSON('package.json');
@@ -101,7 +102,8 @@ module.exports = function(grunt) {
 				svnpath: svnpath,
 				max_buffer: options.max_buffer,
 				build_dir: build_dir,
-				assets_dir: options.assets_dir
+				assets_dir: options.assets_dir,
+				force_interactive: options.force_interactive ? '--force-interactive' : ''
 			};
 
 			var steps = [
@@ -134,7 +136,7 @@ module.exports = function(grunt) {
 
 	var checkOut = function ( ctxt, callback ) {
 		grunt.log.writeln( 'Checking out '+ ctxt.svnurl+ '...' );
-		exec( 'svn co  --force-interactive '+ctxt.svnurl+ ' ' + ctxt.svnpath, { maxBuffer: ctxt.max_buffer }, function (error, stdout, stderr) {
+		exec( 'svn co ' + ctxt.force_interactive + ' '+ctxt.svnurl+ ' ' + ctxt.svnpath, { maxBuffer: ctxt.max_buffer }, function (error, stdout, stderr) {
 			if (error !== null) {
 				grunt.fail.fatal( 'Checkout of "'+ctxt.svnurl+'"unsuccessful: ' + error);
 			}
@@ -198,7 +200,7 @@ module.exports = function(grunt) {
 	var commitToTrunk = function( ctxt, callback ) {
 		var trunkCommitMsg = "Committing " + ctxt.new_version + " to trunk";
 		grunt.log.writeln( "\n" + trunkCommitMsg + "\n" );
-		var cmd = 'svn commit --force-interactive --username="'+ctxt.svnuser+'" -m "'+trunkCommitMsg+'"';
+		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+trunkCommitMsg+'"';
 		exec( cmd, {cwd:ctxt.svnpath+'/trunk'}, function(error, stdout, stderr) {
 			if (error !== null) {
 				grunt.fail.warn( 'Failed to commit to trunk: ' + error );
@@ -220,7 +222,7 @@ module.exports = function(grunt) {
 	var commitTag = function( ctxt, callback ) {
 		var tagCommitMsg   = "Tagging " + ctxt.new_version;
 		grunt.log.writeln( tagCommitMsg + "\n" );
-		var cmd = 'svn commit --force-interactive --username="'+ctxt.svnuser+'" -m "'+tagCommitMsg+'"';
+		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+tagCommitMsg+'"';
 		exec( cmd , { cwd: ctxt.svnpath+'/tags/'+ctxt.new_version }, function( error, stdout, stderr) {
 			if (error !== null) {
 				grunt.fail.warn( 'Failed to comit tag: ' + error );
@@ -235,7 +237,7 @@ module.exports = function(grunt) {
 
 		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | awk '{print $2}' | xargs svn add;"; //Add new files
 		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | awk '{print $2}' | xargs svn delete;"; //Remove missing files
-		cmd += 'svn commit --force-interactive --username="'+ctxt.svnuser+'" -m "'+assetCommitMsg+'"';
+		cmd += 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+assetCommitMsg+'"';
 
 		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
 			if (error !== null) {
