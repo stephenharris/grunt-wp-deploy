@@ -196,8 +196,8 @@ module.exports = function(grunt) {
 	};
 
 	var addFiles = function( ctxt, callback ) {
-		var cmd = "svn status | " + awk + " '/^[?]/{print $2}' | xargs --no-run-if-empty svn add;"; //Add new files
-		cmd += "svn status | " + awk + " '/^[!]/{print $2}' | xargs --no-run-if-empty svn delete;"; //Remove missing files
+		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | " + awk + " '{print $2}' | xargs svn add;"; //Add new files
+		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | " + awk + " '{print $2}' | xargs svn delete;"; //Remove missing files
 		exec(cmd,{cwd: ctxt.svnpath+"/trunk"}, function( a, b, c ){
 			callback( null, ctxt );
 		});
@@ -237,22 +237,14 @@ module.exports = function(grunt) {
 		});
 	};
 
-	var addAssets = function( ctxt, callback ) {
-		var cmd = "svn status | " + awk + " '/^[?]/{print $2}' | xargs --no-run-if-empty svn add;"; //Add new files
-		cmd += "svn status | " + awk + " '/^[!]/{print $2}' | xargs --no-run-if-empty svn delete;"; //Remove missing files
-
-		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
-			if (error !== null) {
-				grunt.fail.warn( 'Failed to add assets: ' + error );
-			}
-			callback( null, ctxt );
-		} );
-	};
-
 	var commitAssets = function( ctxt, callback ) {
 		var assetCommitMsg = "Committing assets for " + ctxt.new_version;
 		grunt.log.writeln( assetCommitMsg + "\n" );
-		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+assetCommitMsg+'"';
+
+		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | " + awk + " '{print $2}' | xargs svn add;"; //Add new files
+		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | " + awk + " '{print $2}' | xargs svn delete;"; //Remove missing files
+		cmd += 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+assetCommitMsg+'"';
+
 		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
 			if (error !== null) {
 				grunt.fail.warn( 'Failed to commit to assets: ' + error );
