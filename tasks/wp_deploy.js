@@ -125,7 +125,7 @@ module.exports = function(grunt) {
 			].filter(function(val) { return val !== null; });
 
 			//Clean up temp dir
-			exec( 'rm -fr '+svnpath );
+			exec( 'find '+svnpath+"/trunk -not -path '*.svn*' -type f -delete" );
 
 			async.waterfall( steps, function (err, result){
 				done();
