@@ -66,7 +66,7 @@ module.exports = function(grunt) {
     wp_deploy: {
 		first: { 
 			options: {
-				svn_url: ' file://' + path.resolve() + '/tmp/repo/',
+				svn_url: 'file://' + path.resolve() + '/tmp/repo/',
 				plugin_slug: 'wp-deploy',
 				svn_user: 'stephenharris',  
 				skip_confirmation: true,
@@ -77,7 +77,7 @@ module.exports = function(grunt) {
 		},
 		second: { 
 			options: {
-				svn_url: ' file://' + path.resolve() + '/tmp/repo/',
+				svn_url: 'file://' + path.resolve() + '/tmp/repo/',
 				plugin_slug: 'wp-deploy',
 				svn_user: 'stephenharris',  
 				skip_confirmation: true,
