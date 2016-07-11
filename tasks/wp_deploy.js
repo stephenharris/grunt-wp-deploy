@@ -33,9 +33,12 @@ module.exports = function(grunt) {
 			max_buffer: 200*1024,
 			skip_confirmation: false,
 			force_interactive: true,
+			deploy_trunk: true,
+			deploy_tag: true
 		});
 
 		var pkg = grunt.file.readJSON('package.json');
+		options.deploy_tag = options.deploy_tag && options.deploy_trunk;
 
 		if( !options.plugin_slug ){
 			grunt.fail.fatal( "Plug-in slug not provided" );
@@ -104,7 +107,8 @@ module.exports = function(grunt) {
 				max_buffer: options.max_buffer,
 				build_dir: build_dir,
 				assets_dir: options.assets_dir,
-				force_interactive: options.force_interactive ? '--force-interactive' : ''
+				force_interactive: options.force_interactive ? '--force-interactive' : '',
+				deploy_tag: options.deploy_tag
 			};
 
 			var steps = [
@@ -112,14 +116,14 @@ module.exports = function(grunt) {
 					callback( null, ctxt );
 				},
 				checkOut,
-				clearTrunk,
-				copyBuild,
+				options.deploy_trunk ? clearTrunk : null,
+				options.deploy_trunk ? copyBuild : null,
 				options.assets_dir ? copyAssets : null,
 				options.skip_confirmation ? null : confirmation,
-				addFiles,
-				commitToTrunk,
-				copyToTag,
-				commitTag,
+				options.deploy_trunk ? addFiles : null,
+				options.deploy_trunk ? commitToTrunk : null,
+				options.deploy_tag ? copyToTag : null,
+				options.deploy_tag ? commitTag : null,
 				options.assets_dir ? addAssets : null,
 				options.assets_dir ? commitAssets : null
 			].filter(function(val) { return val !== null; });
@@ -145,7 +149,7 @@ module.exports = function(grunt) {
 
 			grunt.log.writeln( 'Check out complete.' + "\n" );
 
-			if( grunt.file.exists(  ctxt.svnpath+"/tags/"+ctxt.new_version) ){
+			if( ctxt.deploy_tag && grunt.file.exists(  ctxt.svnpath+"/tags/"+ctxt.new_version) ){
 				grunt.fail.warn( 'Tag ' + ctxt.new_version + ' already exists');
 			}
 			callback( null, ctxt );
