@@ -244,6 +244,7 @@ module.exports = function(grunt) {
  
 		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
 			if (error !== null) {
+				grunt.log.writeln( cmd );
 				grunt.fail.warn( 'Failed to add assets: ' + error );
 			}
 			callback( null, ctxt );
