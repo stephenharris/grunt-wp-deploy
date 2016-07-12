@@ -66,8 +66,8 @@ module.exports = function(grunt) {
     wp_deploy: {
 		first: { 
 			options: {
-				svn_url: 'file://' + path.resolve() + '/tmp/repo/',
-				plugin_slug: 'wp-deploy',
+				svn_url: 'file://' + path.resolve() + '/tmp/repo/standard',
+				plugin_slug: 'standard',
 				svn_user: 'stephenharris',  
 				skip_confirmation: true,
 				build_dir: 'test/fixtures/first/build', //relative path to your build directory
@@ -78,8 +78,8 @@ module.exports = function(grunt) {
 		},
 		second: { 
 			options: {
-				svn_url: 'file://' + path.resolve() + '/tmp/repo/',
-				plugin_slug: 'wp-deploy',
+				svn_url: 'file://' + path.resolve() + '/tmp/repo/standard',
+				plugin_slug: 'standard',
 				svn_user: 'stephenharris',  
 				skip_confirmation: true,
 				build_dir: 'test/fixtures/second/build', //relative path to your build directory
@@ -92,12 +92,12 @@ module.exports = function(grunt) {
 
 	clean: {
 		repo: ['tmp/repo'],
-		checkout: ['tmp/checkout']
+		checkout_standard: ['tmp/checkout/standard']
 	},
 
     init_repo: {
-      main: {
-        dest: 'tmp/repo'
+      standard: {
+        dest: 'tmp/repo/standard'
       }
     },
 
@@ -118,7 +118,9 @@ module.exports = function(grunt) {
 
   // Whenever the "test" task is run, first clean the "tmp" dir, then run this
   // plugin's task(s), then test the result.
-  grunt.registerTask('test', [ 'clean', 'jshint', 'init_repo', 'wp_deploy:first', 'clean:checkout', 'wp_deploy:second', 'nodeunit'] );
+  grunt.registerTask('test', [ 'jshint', 'functional_test'] );
+  
+  grunt.registerTask('functional_test', [ 'clean', 'init_repo', 'wp_deploy:first', 'clean:checkout_standard', 'wp_deploy:second', 'nodeunit'] );
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['test']);

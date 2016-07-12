@@ -28,7 +28,7 @@ exports.wp_deploy = {
     grunt.util.spawn({
       cmd: 'svn',
       args: ['up'],
-      opts: {cwd: 'tmp/checkout/wp-deploy'}
+      opts: {cwd: 'tmp/checkout/standard'}
     }, done);
   },
 
@@ -39,13 +39,11 @@ exports.wp_deploy = {
    */
   build_files: function(test) {
     test.expect(5);
-
-    grunt.file.recurse('test/fixtures/second/build', function(abs, root, subdir, file) {
-      var relativePath = path.join(subdir || '', file);
-      test.ok(grunt.file.exists(path.join('tmp/checkout/wp-deploy/trunk', relativePath)), 'The file ‘' + relativePath + '’ should have been copied into the repository.');
-    });
-
-    test.ok(!grunt.file.exists(path.join('tmp/checkout/wp-deploy/trunk', 'to-be-removed.php')), 'The file ‘to-be-removed.php’ should have been removed from the repository.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'readme.txt')), 'The file ‘cat.png’ should have been copied into the repository.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'standard.php')), 'The file ‘cat.png’ should have been copied into the repository.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'this-file-is-added.php')), 'The file ‘cat.png’ should have been copied into the repository.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'folder/file.php')), 'The file ‘cat.png’ should have been copied into the repository.');
+    test.ok(!grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'to-be-removed.php')), 'The file ‘to-be-removed.php’ should have been removed from the repository.');
     test.done();
   },
 
@@ -55,9 +53,9 @@ exports.wp_deploy = {
    */
   assets_files: function(test) {
     test.expect(3);
-    test.ok(grunt.file.exists(path.join('tmp/checkout/wp-deploy/assets', 'cat.png')), 'The file ‘cat.png’ should have been copied into the repository.');
-    test.ok(grunt.file.exists(path.join('tmp/checkout/wp-deploy/assets', 'wp.png')), 'The file ‘wp.png’ should have been copied into the repository.');
-    test.ok(!grunt.file.exists(path.join('tmp/checkout/wp-deploy/assets', 'wp-orange.png')), 'The file ‘wp-orange.png’ should have been removed from the repository.');
+    test.ok(grunt.file.exists(path.join('tmp/checkout/standard/assets', 'cat.png')), 'The file ‘cat.png’ should have been copied into the repository.');
+    test.ok(grunt.file.exists(path.join('tmp/checkout/standard/assets', 'wp.png')), 'The file ‘wp.png’ should have been copied into the repository.');
+    test.ok(!grunt.file.exists(path.join('tmp/checkout/standard/assets', 'wp-orange.png')), 'The file ‘wp-orange.png’ should have been removed from the repository.');
     test.done();
   },
 
@@ -69,7 +67,7 @@ exports.wp_deploy = {
     grunt.util.spawn({
       cmd: "svn",
       args: ['log'],
-      opts: {cwd: 'tmp/checkout/wp-deploy'}
+      opts: {cwd: 'tmp/checkout/standard'}
     }, function(error, result, code){
       //result.stdout is the commit logs, we need to tidy them up to get the commit messages
       var res = result.stdout.replace(/^((r\d.*)|(-*)|($))/mg,'').replace( /^\s*\n/gm, '' );
@@ -89,7 +87,7 @@ exports.wp_deploy = {
     grunt.util.spawn({
       cmd: 'ls',
       args: ['-1', 'tags'],
-      opts: {cwd: 'tmp/checkout/wp-deploy'}
+      opts: {cwd: 'tmp/checkout/standard'}
     },function( error, result, code ){
       //C
       var expected = "1.3.2\n1.4.0";
