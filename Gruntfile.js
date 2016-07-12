@@ -62,9 +62,9 @@ module.exports = function(grunt) {
       },
     },
 
-    // Configuration to be run (and then tested).
+    // Configurations to be run (and then tested).
     wp_deploy: {
-		first: { 
+		first: { //First standard test
 			options: {
 				svn_url: 'file://' + path.resolve() + '/tmp/repo/standard',
 				plugin_slug: 'standard',
@@ -76,7 +76,7 @@ module.exports = function(grunt) {
 				force_interactive: false,
 			}
 		},
-		second: { 
+		second: { //Second commit (standard test)
 			options: {
 				svn_url: 'file://' + path.resolve() + '/tmp/repo/standard',
 				plugin_slug: 'standard',
@@ -87,17 +87,35 @@ module.exports = function(grunt) {
 				tmp_dir: 'tmp/checkout',
 				force_interactive: false,
 			}
+		},
+		alt_filenames: { //Testing deployments using alternative readme file (i.e. not readme.txt) and alternative main plug-in file.
+			options: {
+				svn_url: 'file://' + path.resolve() + '/tmp/repo/alt-filenames',
+				plugin_slug: 'alt-filenames',
+				plugin_main_file: 'alt-plugin-main-file.php',
+				svn_user: 'stephenharris',  
+				skip_confirmation: true,
+				build_dir: 'test/fixtures/alt-filenames/build', //relative path to your build directory
+				assets_dir: false,
+				tmp_dir: 'tmp/checkout',
+				force_interactive: false,
+			}
 		}
     },
 
 	clean: {
 		repo: ['tmp/repo'],
-		checkout_standard: ['tmp/checkout/standard']
+		checkout_standard: ['tmp/checkout/standard'],
+		checkout_alt_filenames: ['tmp/checkout/alt-filenames']
 	},
 
+	// Initialise the repositories we use in the thests
     init_repo: {
       standard: {
         dest: 'tmp/repo/standard'
+      },
+      alt_filenames: {
+        dest: 'tmp/repo/alt-filenames'
       }
     },
 
@@ -120,7 +138,7 @@ module.exports = function(grunt) {
   // plugin's task(s), then test the result.
   grunt.registerTask('test', [ 'jshint', 'functional_test'] );
   
-  grunt.registerTask('functional_test', [ 'clean', 'init_repo', 'wp_deploy:first', 'clean:checkout_standard', 'wp_deploy:second', 'nodeunit'] );
+  grunt.registerTask('functional_test', [ 'clean', 'init_repo', 'wp_deploy:first', 'clean:checkout_standard', 'wp_deploy:second', 'wp_deploy:alt_filenames', 'nodeunit'] );
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['test']);

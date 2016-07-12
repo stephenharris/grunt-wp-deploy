@@ -3,26 +3,10 @@
 var grunt = require('grunt');
 var path = require('path');
 
-/*
-  ======== A Handy Little Nodeunit Reference ========
-  https://github.com/caolan/nodeunit
-
-  Test methods:
-    test.expect(numAssertions)
-    test.done()
-  Test assertions:
-    test.ok(value, [message])
-    test.equal(actual, expected, [message])
-    test.notEqual(actual, expected, [message])
-    test.deepEqual(actual, expected, [message])
-    test.notDeepEqual(actual, expected, [message])
-    test.strictEqual(actual, expected, [message])
-    test.notStrictEqual(actual, expected, [message])
-    test.throws(block, [error], [message])
-    test.doesNotThrow(block, [error], [message])
-    test.ifError(value)
-*/
-
+/**
+ * This test is for basic standard behaviour of the plugin. Committing changes, including
+ * file additions, removals, tagging and commit messages.
+ */
 exports.wp_deploy = {
   setUp: function(done) {
     grunt.util.spawn({
@@ -38,8 +22,9 @@ exports.wp_deploy = {
    * have been removed. (e.g. to-be-removed.php)
    */
   build_files: function(test) {
-    test.expect(5);
+    test.expect(6);
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'readme.txt')), 'The file ‘cat.png’ should have been copied into the repository.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'standard.php')), 'The file ‘cat.png’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'this-file-is-added.php')), 'The file ‘cat.png’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'folder/file.php')), 'The file ‘cat.png’ should have been copied into the repository.');
