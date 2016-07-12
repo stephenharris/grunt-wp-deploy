@@ -238,8 +238,9 @@ module.exports = function(grunt) {
 	};
 
 	var addAssets = function( ctxt, callback ) {
-		var cmd = "svn status | " + awk + " '/^[?]/{print $2}' | xargs --no-run-if-empty svn add;"; //Add new files
-		cmd += "svn status | " + awk + " '/^[!]/{print $2}' | xargs --no-run-if-empty svn delete;"; //Remove missing files
+	
+		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | " + awk + " '{print $2}' | xargs svn add;";
+		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | " + awk + " '{print $2}' | xargs svn delete;";
  
 		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
 			if (error !== null) {
