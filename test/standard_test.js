@@ -22,13 +22,17 @@ exports.wp_deploy = {
    * have been removed. (e.g. to-be-removed.php)
    */
   build_files: function(test) {
-    test.expect(6);
+    test.expect(8);
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'readme.txt')), 'The file ‘cat.png’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'standard.php')), 'The file ‘cat.png’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'this-file-is-added.php')), 'The file ‘cat.png’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'folder/file.php')), 'The file ‘cat.png’ should have been copied into the repository.');
     test.ok(!grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'to-be-removed.php')), 'The file ‘to-be-removed.php’ should have been removed from the repository.');
+    
+    //These files were previously not checked in. Since 2.0.0 we do not ignore them
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', '.gitignore')), 'The file ‘.gitignore’ should have been copied into the repository.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'deploy.sh')), 'The file ‘deploy.sh’ should have been copied into the repository.');
     test.done();
   },
 

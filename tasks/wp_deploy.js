@@ -316,7 +316,7 @@ module.exports = function(grunt) {
 			src_dir = src_dir + '/';
 		}
 
-		grunt.file.expand(  { 'expand': true, 'cwd' : src_dir }, '**/*' ).forEach( function( src ){
+		grunt.file.expand(  { 'expand': true, 'cwd' : src_dir, dot: true }, '**/*' ).forEach( function( src ){
 			var dest = unixifyPath(path.join( dest_dir, src));
 			if ( grunt.file.isDir( src_dir + src ) ) {
 				grunt.file.mkdir( dest);
