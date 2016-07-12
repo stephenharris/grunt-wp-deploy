@@ -15,7 +15,7 @@ module.exports = function(grunt) {
 	var async = require('async');
 	var path = require('path');
 	var awk = process.platform === 'win32'? 'gawk' : 'awk';
-	var no_run_if_empty = process.platform === 'linux' ? '--no-run-if-empty ' : '';
+	var no_run_if_empty = process.platform !== 'darwin' ? '--no-run-if-empty ' : '';
 
 	// Please see the Grunt documentation for more information regarding task
 	// creation: http://gruntjs.com/creating-tasks
