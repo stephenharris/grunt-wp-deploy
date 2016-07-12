@@ -95,4 +95,44 @@ exports.wp_deploy = {
       test.done();
     });
   },
+  
+  first_tag: function(test) {
+    test.expect(8);
+        
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'readme.txt')), 'The file ‘cat.png’ should have been copied into 1.3.2.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into 1.3.2.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'standard.php')), 'The file ‘cat.png’ should have been copied into 1.3.2.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'to-be-removed.php')), 'The file ‘cat.png’ should have been copied into 1.3.2.');
+    
+    //Make sure no additional files crept in:
+    grunt.file.recurse('tmp/checkout/standard/tags/1.3.2', function(abs, root, subdir, file) {
+    	subdir = ( 'undefined' == typeof subdir ) ? '' : subdir;
+    	test.ok(grunt.file.exists(path.join('test/fixtures/first/build', subdir, file)), 'The file ‘' + file + '’ has been copied into 1.3.2 but should not have been.');
+    });
+
+    test.done();
+  },
+  
+  second_tag: function(test) {
+    test.expect(15);
+        
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'readme.txt')), 'The file ‘cat.png’ should have been copied into 1.4.0.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into 1.4.0.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'standard.php')), 'The file ‘cat.png’ should have been copied into 1.4.0.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'this-file-is-added.php')), 'The file ‘cat.png’ should have been copied into 1.4.0.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'folder/file.php')), 'The file ‘cat.png’ should have been copied into 1.4.0.');
+    test.ok(!grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'to-be-removed.php')), 'The file ‘to-be-removed.php’ should have been removed from 1.4.0.');
+	
+	//These files were previously not checked in. Since 2.0.0 we do not ignore them
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', '.gitignore')), 'The file ‘.gitignore’ should have been copied into the repository.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'deploy.sh')), 'The file ‘deploy.sh’ should have been copied into the repository.');
+    
+    //Make sure no additional files crept in:
+    grunt.file.recurse('tmp/checkout/standard/tags/1.4.0', function(abs, root, subdir, file) {
+    	subdir = ( 'undefined' == typeof subdir ) ? '' : subdir;
+    	test.ok(grunt.file.exists(path.join('test/fixtures/second/build', subdir, file)), 'The file ‘' + file + '’ has been copied into 1.4.0 but should not have been.');
+    });
+
+    test.done();
+  },
 };
