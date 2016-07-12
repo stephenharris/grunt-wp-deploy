@@ -207,8 +207,8 @@ module.exports = function(grunt) {
 	};
 
 	var addFiles = function( ctxt, callback ) {
-		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | " + awk + " '{print $2}' | xargs " + no_run_if_empty + "svn add;"; //Add new files
-		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | " + awk + " '{print $2}' | xargs " + no_run_if_empty + "svn delete;"; //Remove missing files
+		var cmd = "svn status |" + awk + " '/^[?]/{print $2}' | xargs " + no_run_if_empty + "svn add;";
+		cmd += "svn status |" + awk + " '/^[!]/{print $2}' | xargs " + no_run_if_empty + "svn delete;";
 		exec(cmd,{cwd: ctxt.svnpath+"/trunk"}, function( a, b, c ){
 			callback( null, ctxt );
 		});
@@ -249,10 +249,8 @@ module.exports = function(grunt) {
 	};
 
 	var addAssets = function( ctxt, callback ) {
-	
-		var cmd = "svn status | grep -v '^.[ \t]*\\..*' | grep '^?' | " + awk + " '{print $2}' | xargs " + no_run_if_empty + "svn add;";
-		cmd += "svn status | grep -v '^.[ \t]*\\..*' | grep '^!' | " + awk + " '{print $2}' | xargs " + no_run_if_empty + "svn delete;";
- 
+		var cmd = "svn status |" + awk + " '/^[?]/{print $2}' | xargs " + no_run_if_empty + "svn add;";
+		cmd += "svn status |" + awk + " '/^[!]/{print $2}' | xargs " + no_run_if_empty + "svn delete;";
 		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
 			if (error !== null) {
 				grunt.log.writeln( cmd );
