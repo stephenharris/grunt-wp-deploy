@@ -22,7 +22,8 @@ exports.wp_deploy = {
    * have been removed. (e.g. to-be-removed.php)
    */
   build_files: function(test) {
-    test.expect(8);
+    test.expect(17);
+        
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'readme.txt')), 'The file ‘cat.png’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'standard.php')), 'The file ‘cat.png’ should have been copied into the repository.');
@@ -33,6 +34,16 @@ exports.wp_deploy = {
     //These files were previously not checked in. Since 2.0.0 we do not ignore them
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', '.gitignore')), 'The file ‘.gitignore’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/trunk', 'deploy.sh')), 'The file ‘deploy.sh’ should have been copied into the repository.');
+    
+    //Make sure no additional files crept in:
+    grunt.file.recurse('tmp/checkout/standard/trunk', function(abs, root, subdir, file) {
+    	subdir = ( 'undefined' == typeof subdir ) ? '' : subdir;
+    	test.ok(grunt.file.exists(path.join('test/fixtures/second/build', subdir, file)), 'The file ‘' + file + '’ has been copied into trunk but should not have been.');
+    });
+    grunt.file.recurse('tmp/checkout/standard/assets', function(abs, root, subdir, file) {
+    	test.ok(grunt.file.exists(path.join('test/fixtures/second/assets', file)), 'The file ‘' + file + '’ has been copied into assets but should not have been.');
+    });
+    
     test.done();
   },
 

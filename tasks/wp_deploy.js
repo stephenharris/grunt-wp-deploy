@@ -129,6 +129,7 @@ module.exports = function(grunt) {
 				checkOut,
 				options.deploy_trunk ? clearTrunk : null,
 				options.deploy_trunk ? copyBuild : null,
+				options.assets_dir ? clearAssets : null,
 				options.assets_dir ? copyAssets : null,
 				options.skip_confirmation ? null : confirmation,
 				options.deploy_trunk ? addFiles : null,
@@ -139,13 +140,9 @@ module.exports = function(grunt) {
 				options.assets_dir ? commitAssets : null
 			].filter(function(val) { return val !== null; });
 
-			//Clean up temp dir
-			exec( 'find '+svnpath+"/trunk -not -path '*.svn*' -type f -delete" );
-
 			async.waterfall( steps, function (err, result){
 				done();
 			});
-
 
 		});//Initial questions
 
@@ -170,6 +167,13 @@ module.exports = function(grunt) {
 	var clearTrunk = function ( ctxt, callback ) {
 		grunt.log.writeln( 'Clearing trunk.');
 		exec( 'rm -fr '+ctxt.svnpath+"/trunk/*", function(){
+			callback( null, ctxt );
+		});
+	};
+	
+	var clearAssets = function ( ctxt, callback ) {
+		grunt.log.writeln( 'Clearing assets.');
+		exec( 'rm -fr '+ctxt.svnpath+"/assets/*", function(){
 			callback( null, ctxt );
 		});
 	};
@@ -208,7 +212,7 @@ module.exports = function(grunt) {
 
 	var addFiles = function( ctxt, callback ) {
 		var cmd = "svn status |" + awk + " '/^[?]/{print $2}' | xargs " + no_run_if_empty + "svn add;";
-		cmd += "svn status |" + awk + " '/^[!]/{print $2}' | xargs " + no_run_if_empty + "svn delete;";
+		cmd += "svn status | " + awk + " '/^[!]/{print $2}' | xargs " + no_run_if_empty + "svn delete;";
 		exec(cmd,{cwd: ctxt.svnpath+"/trunk"}, function( a, b, c ){
 			callback( null, ctxt );
 		});
@@ -250,7 +254,7 @@ module.exports = function(grunt) {
 
 	var addAssets = function( ctxt, callback ) {
 		var cmd = "svn status |" + awk + " '/^[?]/{print $2}' | xargs " + no_run_if_empty + "svn add;";
-		cmd += "svn status |" + awk + " '/^[!]/{print $2}' | xargs " + no_run_if_empty + "svn delete;";
+		cmd += "svn status | " + awk + " '/^[!]/{print $2}' | xargs " + no_run_if_empty + "svn delete;";
 		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
 			if (error !== null) {
 				grunt.log.writeln( cmd );
