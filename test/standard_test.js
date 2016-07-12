@@ -38,9 +38,15 @@ exports.wp_deploy = {
     //Make sure no additional files crept in:
     grunt.file.recurse('tmp/checkout/standard/trunk', function(abs, root, subdir, file) {
     	subdir = ( 'undefined' == typeof subdir ) ? '' : subdir;
+        if ( grunt.file.isMatch( { dot: true }, ['**/.svn/**', '**.svn-base'], abs ) ) {
+    		return;
+    	}
     	test.ok(grunt.file.exists(path.join('test/fixtures/second/build', subdir, file)), 'The file ‘' + file + '’ has been copied into trunk but should not have been.');
     });
     grunt.file.recurse('tmp/checkout/standard/assets', function(abs, root, subdir, file) {
+        if ( grunt.file.isMatch( { dot: true }, ['**/.svn/**', '**.svn-base'], abs ) ) {
+    		return;
+    	}
     	test.ok(grunt.file.exists(path.join('test/fixtures/second/assets', file)), 'The file ‘' + file + '’ has been copied into assets but should not have been.');
     });
     
@@ -103,9 +109,11 @@ exports.wp_deploy = {
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into 1.3.2.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'standard.php')), 'The file ‘cat.png’ should have been copied into 1.3.2.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'to-be-removed.php')), 'The file ‘cat.png’ should have been copied into 1.3.2.');
-    
     //Make sure no additional files crept in:
     grunt.file.recurse('tmp/checkout/standard/tags/1.3.2', function(abs, root, subdir, file) {
+        if ( grunt.file.isMatch( { dot: true }, ['**/.svn/**', '**.svn-base'], abs ) ) {
+    		return;
+    	}
     	subdir = ( 'undefined' == typeof subdir ) ? '' : subdir;
     	test.ok(grunt.file.exists(path.join('test/fixtures/first/build', subdir, file)), 'The file ‘' + file + '’ has been copied into 1.3.2 but should not have been.');
     });
@@ -130,6 +138,9 @@ exports.wp_deploy = {
     //Make sure no additional files crept in:
     grunt.file.recurse('tmp/checkout/standard/tags/1.4.0', function(abs, root, subdir, file) {
     	subdir = ( 'undefined' == typeof subdir ) ? '' : subdir;
+        if ( grunt.file.isMatch( { dot: true }, ['**/.svn/**', '**.svn-base'], abs ) ) {
+    		return;
+    	}
     	test.ok(grunt.file.exists(path.join('test/fixtures/second/build', subdir, file)), 'The file ‘' + file + '’ has been copied into 1.4.0 but should not have been.');
     });
 
