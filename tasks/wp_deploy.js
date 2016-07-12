@@ -78,6 +78,19 @@ module.exports = function(grunt) {
 			var svnurl = options.svn_url.replace( '{plugin-slug}', slug );
 
 			//Try to find readme
+			var readmes = ['readme', 'README', 'ReadMe' ], exts = ['txt','md'];
+		
+			while( !grunt.file.exists(readme_file) && readmes.length > 0 ) {
+				var ext = exts.shift();
+				while( !grunt.file.exists(readme_file) && readmes.length > 0 ) {
+					var filename = readmes.shift();
+					readme_file = build_dir + filename + '.' + ext;
+					//try markdown equivalent
+					if ( !grunt.file.exists(readme_file) ) {
+						readme_file = build_dir + filename + ".md";
+					}
+				}
+			}
 			if ( !grunt.file.exists(readme_file) ) {
 				grunt.fail.warn('readme.txt file not not found at ' + readme_file );
 			}
