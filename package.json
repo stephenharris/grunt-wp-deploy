@@ -37,7 +37,7 @@
     "jshint-stylish": "~0.1.3"
   },
   "peerDependencies": {
-    "grunt": "~0.4.1"
+    "grunt": ">=0.4.1"
   },
   "dependencies": {
     "inquirer": "~0.2.1"
