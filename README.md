@@ -1,9 +1,11 @@
+[![Build Status](https://travis-ci.org/stephenharris/grunt-wp-deploy.svg?branch=develop)](https://travis-ci.org/stephenharris/grunt-wp-deploy)
+
 # grunt-wp-deploy
 
 > Deploys a git Repo to the WordPress SVN repo
 
 ## Getting Started
-This plugin requires Grunt `~0.4.1`
+This plugin requires Grunt `>=0.4.1`
 
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
@@ -24,8 +26,8 @@ This task is for deploying a plug-in to the [WordPress repository](http://wordpr
 ### Before you start, you'll need...
  1. To have been [accepted](http://wordpress.org/plugins/about/) on to the WordPress repository
  2. **plugin-slug** - You can get this from your plug-in's repo url: *http://wordpress.org/plugins/{plugin-slug}*
- 3. **readme.txt** - See [http://wordpress.org/plugins/about/#readme](http://wordpress.org/plugins/about/#readme) 
- 4. **plugin-slug.php** - The 'main file' of the plug-in (containing the plugin header). Currently this must be named **{plugin-slug}.php** where {plugin-slug} should be replaced by your plug-in's slug. See (2).
+ 3. **readme.txt** (or `readme.md`) - See [http://wordpress.org/plugins/about/#readme](http://wordpress.org/plugins/about/#readme) 
+ 4. **plugin-slug.php** - The 'main file' of the plug-in (containing the plugin header).
  5. **build directory** - This a complete copy of the plug-in as you want it on the directory
  6. (Optional) **assets directory** - This directory should contain the plug-in's screenshots and other files you want in the 'assets' directory in the root of the plug-ins WordPress SVN repo. See [https://wordpress.org/plugins/about/faq/](https://wordpress.org/plugins/about/faq/) for details.
 
@@ -99,11 +101,37 @@ Default value: `/tmp/`
 
 Location where your SVN repository is checked out to. **Note:** Before the the repository is checked out `<tmp_dir>/<plugin_slug>` is deleted.
 
+#### options.skip_confirmation
+Type: `Bool`
+Default value: `false`
+
+If `false`, you will be asked for confirmation before commiting the plug-in to the repository. This will give you the opportunity to inspect the `trunk` in the `options.tmp_dir` to see what is being committed.
+
+#### options.deploy_trunk
+Type: `Bool`
+Default value: `true`
+
+Whether to deploy to trunk. This could be set to `false` to only commit the assets directory.
+
+#### options.deploy_tag
+Type: `Bool`
+Default value: `true`
+
+Whether to deploy to a tag. You will need to have set to `options.deploy_trunk` to `true`. This can set to `false` to only deploy to trunk (e.g. when only updating the 'Tested up to' value and not deploying a release).
+
 
 ## Contributing
+
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
+
 ## Release History
+
+### 1.2.0 - 18th July 2016
+- Added option to disable the commit confirmation
+- Added options to disable committing to trunk and/or tag
+- Added support for `readme.md` (as an alternative to `readme.txt`).
+- Added support for variations on readme file casing (readme, README, ReadMe)
 
 ### 1.1.0 - 20th July 2015
 - Add --force-interactive to request password if it is not know. Fixes [#15](https://github.com/stephenharris/grunt-wp-deploy/issues/15)
