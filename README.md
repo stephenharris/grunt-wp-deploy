@@ -21,12 +21,12 @@ grunt.loadNpmTasks('grunt-wp-deploy');
 
 ## The "wp_deploy" task
 
-This task is for deploying a plug-in to the [WordPress repository](http://wordpress.org/plugins/) from a 'build directory'. 
+This task is for deploying a plug-in to the [WordPress repository](https://wordpress.org/plugins/) from a 'build directory'. 
 
 ### Before you start, you'll need...
- 1. To have been [accepted](http://wordpress.org/plugins/about/) on to the WordPress repository
- 2. **plugin-slug** - You can get this from your plug-in's repo url: *http://wordpress.org/plugins/{plugin-slug}*
- 3. **readme.txt** (or `readme.md`) - See [http://wordpress.org/plugins/about/#readme](http://wordpress.org/plugins/about/#readme) 
+ 1. To have been [accepted](https://wordpress.org/plugins/about/) on to the WordPress repository
+ 2. **plugin-slug** - You can get this from your plug-in's repo url: *https://wordpress.org/plugins/{plugin-slug}*
+ 3. **readme.txt** (or `readme.md`) - See [https://wordpress.org/plugins/about/#readme](https://wordpress.org/plugins/about/#readme) 
  4. **plugin-slug.php** - The 'main file' of the plug-in (containing the plugin header).
  5. **build directory** - This a complete copy of the plug-in as you want it on the directory
  6. (Optional) **assets directory** - This directory should contain the plug-in's screenshots and other files you want in the 'assets' directory in the root of the plug-ins WordPress SVN repo. See [https://wordpress.org/plugins/about/faq/](https://wordpress.org/plugins/about/faq/) for details.
@@ -55,7 +55,7 @@ grunt.initConfig({
 Type: `String`
 Default value: `false`
 
-Your plug-in's slug as indicated by its repository url *http://wordpress.org/plugins/{plugin-slug}*
+Your plug-in's slug as indicated by its repository url *https://wordpress.org/plugins/{plugin-slug}*
 
 #### options.plugin_main_file
 Type: `String`
@@ -85,7 +85,7 @@ to users. For more details see: [https://wordpress.org/plugins/about/faq/](https
 
 #### options.svn_url
 Type: `String`
-Default value: `http://plugins.svn.wordpress.org/{plugin-slug}`
+Default value: `https://plugins.svn.wordpress.org/{plugin-slug}`
 
 For flexibilty this plug-in can work with other repos. Simple provide the SVN url, using `{plugin-slug}` as placeholder indicating where the plug-in slug should be.
 
