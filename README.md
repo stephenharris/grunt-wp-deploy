@@ -127,6 +127,11 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### 1.2.1 - 9th January
+- Fixed error message when plugin and readme version do not match
+- Fixed README.md (updated links to HTTPS, corrected example) thanks to @ntwb
+- Don't check the README version if `deploy_tag` is set to `false` - thanks to @mundschenk-at
+
 ### 1.2.0 - 18th July 2016
 - Added option to disable the commit confirmation
 - Added options to disable committing to trunk and/or tag
