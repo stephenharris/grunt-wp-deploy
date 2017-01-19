@@ -18,7 +18,7 @@ exports.wp_deploy = {
 
   build_files: function(test) {
     test.expect(2);
-	test.ok(grunt.file.exists(path.join('tmp/checkout/stable-tag-in-list/trunk', 'readme.md')), 'The file ‘ReadMe.md’ should have been copied into the repository.');
+	test.ok(grunt.file.exists(path.join('tmp/checkout/stable-tag-in-list/trunk', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into the repository.');
 	test.ok(grunt.file.exists(path.join('tmp/checkout/stable-tag-in-list/trunk', 'stable-tag-in-list.php')), 'The file ‘alt-plugin-main-file.php’ should have been copied into the repository.');
     test.done();
   },
