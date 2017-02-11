@@ -24,7 +24,7 @@ module.exports = function(grunt) {
 		var done = this.async();
 
 		var options = this.options({
-			svn_url: "http://plugins.svn.wordpress.org/{plugin-slug}",
+			svn_url: "https://plugins.svn.wordpress.org/{plugin-slug}/",
 			svn_user: false,
 			plugin_main_file: false,
 			plugin_slug: false,
