@@ -85,7 +85,7 @@ to users. For more details see: [https://wordpress.org/plugins/about/faq/](https
 
 #### options.svn_url
 Type: `String`
-Default value: `https://plugins.svn.wordpress.org/{plugin-slug}`
+Default value: `https://plugins.svn.wordpress.org/{plugin-slug}/`
 
 For flexibilty this plug-in can work with other repos. Simple provide the SVN url, using `{plugin-slug}` as placeholder indicating where the plug-in slug should be.
 
