@@ -127,6 +127,10 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### 1.3.0 - 22nd May 2018
+- Skips version check if no stable tag is provided - thanks to @markjaquith
+- Defaults SVN url to HTTPs - thanks to @fjarrett
+
 ### 1.2.1 - 9th January
 - Fixed error message when plugin and readme version do not match
 - Fixed README.md (updated links to HTTPS, corrected example) thanks to @ntwb
