@@ -16,7 +16,7 @@ module.exports = function(grunt) {
 	var path = require('path');
 	var awk = process.platform === 'win32'? 'gawk' : 'awk';
 	var no_run_if_empty = process.platform !== 'darwin' ? '--no-run-if-empty ' : '';
-
+	var wporg_password = process.env.WPORG_PASSWORD ? process.env.WPORG_PASSWORD: '';
 	// Please see the Grunt documentation for more information regarding task
 	// creation: http://gruntjs.com/creating-tasks
 	grunt.registerMultiTask('wp_deploy', 'Deploys a git Repo to the WordPress SVN repo', function() {
@@ -119,6 +119,7 @@ module.exports = function(grunt) {
 				build_dir: build_dir,
 				assets_dir: options.assets_dir,
 				force_interactive: options.force_interactive ? '--force-interactive' : '',
+				password_flag: wporg_password.length > 0 ? '--password="' + wporg_password.replace(/\\([\s\S])|(")/g,"\\$1$2") + '"' : '', // Escape double qoutes which could be present in password?
 				deploy_tag: options.deploy_tag
 			};
 
@@ -221,7 +222,7 @@ module.exports = function(grunt) {
 	var commitToTrunk = function( ctxt, callback ) {
 		var trunkCommitMsg = "Committing " + ctxt.new_version + " to trunk";
 		grunt.log.writeln( "\n" + trunkCommitMsg + "\n" );
-		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+trunkCommitMsg+'"';
+		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" ' + ctxt.password_flag + ' -m "'+trunkCommitMsg+'"';
 		exec( cmd, {cwd:ctxt.svnpath+'/trunk'}, function(error, stdout, stderr) {
 			if (error !== null) {
 				grunt.fail.warn( 'Failed to commit to trunk: ' + error );
@@ -243,7 +244,7 @@ module.exports = function(grunt) {
 	var commitTag = function( ctxt, callback ) {
 		var tagCommitMsg   = "Tagging " + ctxt.new_version;
 		grunt.log.writeln( tagCommitMsg + "\n" );
-		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+tagCommitMsg+'"';
+		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" '  + ctxt.password_flag + ' -m "'+tagCommitMsg+'"';
 		exec( cmd , { cwd: ctxt.svnpath+'/tags/'+ctxt.new_version }, function( error, stdout, stderr) {
 			if (error !== null) {
 				grunt.fail.warn( 'Failed to comit tag: ' + error );
@@ -268,7 +269,7 @@ module.exports = function(grunt) {
 		var assetCommitMsg = "Committing assets for " + ctxt.new_version;
 		grunt.log.writeln( assetCommitMsg + "\n" );
 
-		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+assetCommitMsg+'"';
+		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" ' + ctxt.password_flag + ' -m "'+assetCommitMsg+'"';
 
 		exec( cmd,{ cwd: ctxt.svnpath+"/assets" }, function(error, stdout, stderr) {
 			if (error !== null) {
