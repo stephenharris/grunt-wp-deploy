@@ -126,6 +126,7 @@ module.exports = function(grunt) {
 				function( callback ) {
 					callback( null, ctxt );
 				},
+				options.deploy_tag ? checkTag : null,
 				checkOutTrunk,
 				options.deploy_trunk ? clearTrunk : null,
 				options.deploy_trunk ? copyBuild : null,
@@ -235,6 +236,18 @@ module.exports = function(grunt) {
 		exec( cmd, {cwd:ctxt.svnpath+'/trunk'}, function(error, stdout, stderr) {
 			if (error !== null) {
 				grunt.fail.warn( 'Failed to commit to trunk: ' + error );
+			}
+			callback( null, ctxt );
+		});
+	};
+
+	var checkTag = function( ctxt, callback ) {
+		var tagCheckMsg   = "Checking tag " + ctxt.new_version;
+		grunt.log.writeln( tagCheckMsg + "\n" );
+		var cmd = 'svn co ' + ctxt.svnurl + 'tags/' + ctxt.new_version + '/ ' + ctxt.svnpath + '/' + ctxt.new_version + '/ --username="'+ctxt.svnuser+'"';
+		exec( cmd, function( error, stdout, stderr) {
+			if (error === null) {
+				grunt.fail.fatal( 'Tag already exists' );
 			}
 			callback( null, ctxt );
 		});
