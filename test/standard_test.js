@@ -12,7 +12,7 @@ exports.wp_deploy = {
     grunt.util.spawn({
       cmd: 'svn',
       args: ['up'],
-      opts: {cwd: 'tmp/checkout/standard'}
+      opts: {cwd: 'tmp/checkout/standard/trunk'}
     }, done);
   },
 
@@ -72,8 +72,7 @@ exports.wp_deploy = {
     test.expect(1);
     grunt.util.spawn({
       cmd: "svn",
-      args: ['log'],
-      opts: {cwd: 'tmp/checkout/standard'}
+      args: ['log', 'file://' + path.resolve() + '/tmp/repo/standard']
     }, function(error, result, code){
       //result.stdout is the commit logs, we need to tidy them up to get the commit messages
       var res = result.stdout.replace(/^((r\d.*)|(-*)|($))/mg,'').replace( /^\s*\n/gm, '' );
@@ -91,59 +90,52 @@ exports.wp_deploy = {
   tags: function(test) {
     test.expect(1);
     grunt.util.spawn({
-      cmd: 'ls',
-      args: ['-1', 'tags'],
-      opts: {cwd: 'tmp/checkout/standard'}
+      cmd: 'svn',
+      args: ['list', 'file://' + path.resolve() + '/tmp/repo/standard/tags'],
     },function( error, result, code ){
-      //C
-      var expected = "1.3.2\n1.4.0";
+      var expected = "1.3.2/\n1.4.0/";
       test.equal( result.stdout, expected, 'The deployment repository`s tags are not as expected' )
       test.done();
     });
   },
   
   first_tag: function(test) {
-    test.expect(8);
-        
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'readme.txt')), 'The file ‘cat.png’ should have been copied into 1.3.2.');
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into 1.3.2.');
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'standard.php')), 'The file ‘cat.png’ should have been copied into 1.3.2.');
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.3.2', 'to-be-removed.php')), 'The file ‘cat.png’ should have been copied into 1.3.2.');
-    //Make sure no additional files crept in:
-    grunt.file.recurse('tmp/checkout/standard/tags/1.3.2', function(abs, root, subdir, file) {
-        if ( grunt.file.isMatch( { dot: true }, ['**/.svn/**', '**.svn-base'], abs ) ) {
-    		return;
-    	}
-    	subdir = ( 'undefined' == typeof subdir ) ? '' : subdir;
-    	test.ok(grunt.file.exists(path.join('test/fixtures/first/build', subdir, file)), 'The file ‘' + file + '’ has been copied into 1.3.2 but should not have been.');
+    test.expect(1);
+    grunt.util.spawn({
+      cmd: 'svn',
+      args: ['list', '-R', 'file://' + path.resolve() + '/tmp/repo/standard/tags/1.3.2'],
+    },function( error, result, code ){
+      var expected = [
+        "ReadMe.md",
+        "readme.txt",
+        "standard.php",
+        "to-be-removed.php"
+      ];
+      test.equal( result.stdout, expected.join("\n"), 'The files in the 1.3.2 tag are not as expected' )
+      test.done();
     });
-
-    test.done();
   },
   
   second_tag: function(test) {
     test.expect(15);
-        
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'readme.txt')), 'The file ‘cat.png’ should have been copied into 1.4.0.');
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into 1.4.0.');
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'standard.php')), 'The file ‘cat.png’ should have been copied into 1.4.0.');
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'this-file-is-added.php')), 'The file ‘cat.png’ should have been copied into 1.4.0.');
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'folder/file.php')), 'The file ‘cat.png’ should have been copied into 1.4.0.');
-    test.ok(!grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'to-be-removed.php')), 'The file ‘to-be-removed.php’ should have been removed from 1.4.0.');
-	
-	//These files were previously not checked in. Since 2.0.0 we do not ignore them
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', '.gitignore')), 'The file ‘.gitignore’ should have been copied into the repository.');
-	test.ok(grunt.file.exists(path.join('tmp/checkout/standard/tags/1.4.0', 'deploy.sh')), 'The file ‘deploy.sh’ should have been copied into the repository.');
-    
-    //Make sure no additional files crept in:
-    grunt.file.recurse('tmp/checkout/standard/tags/1.4.0', function(abs, root, subdir, file) {
-    	subdir = ( 'undefined' == typeof subdir ) ? '' : subdir;
-        if ( grunt.file.isMatch( { dot: true }, ['**/.svn/**', '**.svn-base'], abs ) ) {
-    		return;
-    	}
-    	test.ok(grunt.file.exists(path.join('test/fixtures/second/build', subdir, file)), 'The file ‘' + file + '’ has been copied into 1.4.0 but should not have been.');
-    });
 
-    test.done();
+    test.expect(1);
+    grunt.util.spawn({
+      cmd: 'svn',
+      args: ['list', '-R', 'file://' + path.resolve() + '/tmp/repo/standard/tags/1.4.0'],
+    },function( error, result, code ){
+      var expected = [
+        ".gitignore",
+        "ReadMe.md",
+        "deploy.sh",
+        "folder/",
+        "folder/file.php",
+        "readme.txt",
+        "standard.php",
+        "this-file-is-added.php",
+      ];
+      test.equal( result.stdout, expected.join("\n"), 'The files in the 1.4.0 tag are not as expected' )
+      test.done();
+    });
   },
 };
