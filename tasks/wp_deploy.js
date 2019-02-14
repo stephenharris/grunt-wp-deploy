@@ -259,7 +259,9 @@ module.exports = function(grunt) {
 
 			//SVN user/url
 			var svnuser = options.svn_user || answers.svn_username;
-			var svnurl = options.svn_url.replace( '{plugin-slug}', slug );
+			var svnurl = options.svn_url
+				.replace( '{plugin-slug}', slug )
+				.replace(/\/?$/, '/'); //ensure trailing slash
 
 			//Try to find readme
 			var exts = ['txt','md'];

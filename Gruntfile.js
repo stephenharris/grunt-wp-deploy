@@ -100,18 +100,18 @@ module.exports = function(grunt) {
 				force_interactive: false,
 			}
 		},
-        version_mismatch: { //Testing version check of readme.txt 'stable' tag and plugin version should be skipped when deploy_tag is true.
-            options: {
-                svn_url: 'file://' + path.resolve() + '/tmp/repo/version-mismatch',
-                plugin_slug: 'version-mismatch',
-                svn_user: 'stephenharris',
-                skip_confirmation: true,
-                build_dir: 'test/fixtures/version-mismatch/build', //relative path to your build directory
-                tmp_dir: 'tmp/checkout',
-                force_interactive: false,
-                deploy_tag:false
-            }
-        }
+    version_mismatch: { //Testing version check of readme.txt 'stable' tag and plugin version should be skipped when deploy_tag is false.
+      options: {
+        svn_url: 'file://' + path.resolve() + '/tmp/repo/version-mismatch',
+        plugin_slug: 'version-mismatch',
+        svn_user: 'stephenharris',
+        skip_confirmation: true,
+        build_dir: 'test/fixtures/version-mismatch/build', //relative path to your build directory
+        tmp_dir: 'tmp/checkout',
+        force_interactive: false,
+        deploy_tag:false
+      }
+    }
     },
 
 	clean: {
