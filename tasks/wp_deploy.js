@@ -24,30 +24,20 @@ module.exports = function(grunt) {
 		});
 	};
 	
-		var checkOutTrunk = function ( ctxt, callback ) {
-		grunt.log.writeln( 'Checking out '+ ctxt.svnurl+ 'trunk/...' );
-		exec( 'svn co ' + ctxt.force_interactive + ' '+ctxt.svnurl+ 'trunk/ ' + ctxt.svnpath + '/trunk/', { maxBuffer: ctxt.max_buffer }, function (error, stdout, stderr) {
-			if (error !== null) {
-				grunt.fail.fatal( 'Checkout of "'+ctxt.svnurl+'trunk/" unsuccessful: ' + error);
-			}
-
-			grunt.log.writeln( 'Check out complete.' + "\n" );
-
-			callback( null, ctxt );
-		});
-	};
-	var checkOutAssets = function ( ctxt, callback ) {
-		grunt.log.writeln( 'Checking out '+ ctxt.svnurl+ 'assets/...' );
-		exec( 'svn co ' + ctxt.force_interactive + ' '+ctxt.svnurl+ 'assets/ ' + ctxt.svnpath + '/assets/', { maxBuffer: ctxt.max_buffer }, function (error, stdout, stderr) {
-			if (error !== null) {
-				grunt.fail.fatal( 'Checkout of "'+ctxt.svnurl+'assets/" unsuccessful: ' + error);
-			}
-
-			grunt.log.writeln( 'Check out complete.' + "\n" );
-
-			callback( null, ctxt );
-		});
-	};
+	var checkOut = function(dir) {
+		return function ( ctxt, callback ) {
+			grunt.log.writeln( 'Checking out ' + ctxt.svnurl + dir + '/...' );
+			exec( 'svn co ' + ctxt.force_interactive + ' ' + ctxt.svnurl + dir + '/ ' + ctxt.svnpath + '/' + dir + '/ ', { maxBuffer: ctxt.max_buffer }, function (error, stdout, stderr) {
+				if (error !== null) {
+					grunt.fail.fatal( 'Checkout of "' + ctxt.svnurl + dir + '/" unsuccessful: ' + error);
+				}
+	
+				grunt.log.writeln( 'Check out complete.' + "\n" );
+	
+				callback( null, ctxt );
+			});
+		};
+	} ;
 
 	var clearAssets = function ( ctxt, callback ) {
 		grunt.log.writeln( 'Clearing assets.');
@@ -321,10 +311,10 @@ module.exports = function(grunt) {
 					callback( null, ctxt );
 				},
 				options.deploy_tag ? checkTag : null,
-				checkOutTrunk,
+				checkOut('trunk'),
 				options.deploy_trunk ? clearTrunk : null,
 				options.deploy_trunk ? copyBuild : null,
-				options.assets_dir ? checkOutAssets : null,
+				options.assets_dir ? checkOut('assets') : null,
 				options.assets_dir ? clearAssets : null,
 				options.assets_dir ? copyAssets : null,
 				options.skip_confirmation ? null : confirmation,
