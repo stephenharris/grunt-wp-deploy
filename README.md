@@ -5,7 +5,7 @@
 > Deploys a git Repo to the WordPress SVN repo
 
 ## Getting Started
-This plugin requires Grunt `>=0.4.1`
+This plugin requires Grunt `>=0.4.1` and node `>=6.0.0`
 
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
@@ -126,6 +126,11 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 
 ## Release History
+
+### 2.0.0 - 14th February 2019
+- No longer checkouts out tags, which reduces check-out time. Thanks to @johnbillion
+- Updated inquirer and other dependencies due to potential security vulnerabilities. Thanks to @dbtlr. Fixes #40
+- Fixed regular expression for parsing stable tag. Thanks to @ocean90. Fixes #34
 
 ### 1.3.0 - 22nd May 2018
 - Skips version check if no stable tag is provided - thanks to @markjaquith
