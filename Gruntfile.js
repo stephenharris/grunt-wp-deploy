@@ -10,9 +10,10 @@
 
 module.exports = function(grunt) {
 	
-	var path = require('path');
+  var path = require('path');
 
-  grunt.registerMultiTask('init_repo', 'Initialize a git repository in a directory.', function() {
+  // Initialize an svn repository (for tests)
+  grunt.registerMultiTask('init_repo', 'Initialize a svn repository in a directory.', function() {
     var dest = this.files[0].dest;
 	var destAbs = path.resolve() + '/' + dest;
 	grunt.config.set('_svnURl', destAbs );
@@ -39,13 +40,11 @@ module.exports = function(grunt) {
 
     var done = this.async();
 
-
     grunt.util.async.series([
       cmd('svnadmin', ['create', '.']),
       cmd('mkdir', ['trunk', 'tags', 'assets', 'branches']),
       cmd('svn', ['import', '.', 'file://' + destAbs, '-m"structure"']),
     ], done);
-
 
   });
 
@@ -100,23 +99,40 @@ module.exports = function(grunt) {
 				tmp_dir: 'tmp/checkout',
 				force_interactive: false,
 			}
-		}
+		},
+        version_mismatch: { //Testing version check of readme.txt 'stable' tag and plugin version should be skipped when deploy_tag is true.
+            options: {
+                svn_url: 'file://' + path.resolve() + '/tmp/repo/version-mismatch',
+                plugin_slug: 'version-mismatch',
+                svn_user: 'stephenharris',
+                skip_confirmation: true,
+                build_dir: 'test/fixtures/version-mismatch/build', //relative path to your build directory
+                tmp_dir: 'tmp/checkout',
+                force_interactive: false,
+                deploy_tag:false
+            }
+        }
     },
 
 	clean: {
 		repo: ['tmp/repo'],
 		checkout_standard: ['tmp/checkout/standard'],
-		checkout_alt_filenames: ['tmp/checkout/alt-filenames']
+		checkout_alt_filenames: ['tmp/checkout/alt-filenames'],
+        checkout_version_mismatch: ['tmp/checkout/version-mismatch'],
 	},
 
-	// Initialise the repositories we use in the thests
+	// Initialise the repositories we use in the tests
     init_repo: {
       standard: {
         dest: 'tmp/repo/standard'
       },
       alt_filenames: {
         dest: 'tmp/repo/alt-filenames'
+      },
+      version_mismatch: {
+        dest: 'tmp/repo/version-mismatch'
       }
+
     },
 
     // Unit tests.
@@ -138,7 +154,13 @@ module.exports = function(grunt) {
   // plugin's task(s), then test the result.
   grunt.registerTask('test', [ 'jshint', 'functional_test'] );
   
-  grunt.registerTask('functional_test', [ 'clean', 'init_repo', 'wp_deploy:first', 'clean:checkout_standard', 'wp_deploy:second', 'wp_deploy:alt_filenames', 'nodeunit'] );
+  grunt.registerTask('functional_test', [
+      'clean', 'init_repo',
+      'wp_deploy:first', 'clean:checkout_standard', 'wp_deploy:second',
+      'wp_deploy:alt_filenames',
+      'wp_deploy:version_mismatch',
+      'nodeunit'
+  ]);
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['test']);
