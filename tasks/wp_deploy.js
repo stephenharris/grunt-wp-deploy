@@ -285,7 +285,7 @@ module.exports = function(grunt) {
 
 			//Get versions:
 			var readme = grunt.file.read(readme_file);
-			var readmeVersion = readme.match( new RegExp("^Stable tag:\\s*(\\S+)","im") );
+			var readmeVersion = readme.match( new RegExp("^[ \t*]*Stable tag:\\s*(\\S+)","im") );
 			var plugin = grunt.file.read(plugin_file);
 			var pluginVersion = plugin.match( new RegExp("^[ \t\/*#@]*Version:\\s*(\\S+)$","im") );
 

@@ -12,14 +12,14 @@ exports.wp_deploy = {
     grunt.util.spawn({
       cmd: 'svn',
       args: ['up'],
-      opts: {cwd: 'tmp/checkout/alt-filenames/trunk'}
+      opts: {cwd: 'tmp/checkout/stable-tag-in-list/trunk'}
     }, done);
   },
 
   build_files: function(test) {
     test.expect(2);
-	test.ok(grunt.file.exists(path.join('tmp/checkout/alt-filenames/trunk', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into the repository.');
-	test.ok(grunt.file.exists(path.join('tmp/checkout/alt-filenames/trunk', 'alt-plugin-main-file.php')), 'The file ‘alt-plugin-main-file.php’ should have been copied into the repository.');
+	  test.ok(grunt.file.exists(path.join('tmp/checkout/stable-tag-in-list/trunk', 'ReadMe.md')), 'The file ‘ReadMe.md’ should have been copied into the repository.');
+	  test.ok(grunt.file.exists(path.join('tmp/checkout/stable-tag-in-list/trunk', 'stable-tag-in-list.php')), 'The file ‘alt-plugin-main-file.php’ should have been copied into the repository.');
     test.done();
   },
 
@@ -27,9 +27,9 @@ exports.wp_deploy = {
     test.expect(1);
     grunt.util.spawn({
       cmd: 'svn',
-      args: ['list', 'file://' + path.resolve() + '/tmp/repo/alt-filenames/tags'],
+      args: ['list', 'file://' + path.resolve() + '/tmp/repo/stable-tag-in-list/tags'],
     },function( error, result, code ){
-      var expected = "1.4.0/";
+      var expected = "1.2.3/";
       test.equal( result.stdout, expected, 'The deployment repository`s tags are not as expected' )
       test.done();
     });
