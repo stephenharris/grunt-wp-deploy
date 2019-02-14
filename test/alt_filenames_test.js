@@ -12,7 +12,7 @@ exports.wp_deploy = {
     grunt.util.spawn({
       cmd: 'svn',
       args: ['up'],
-      opts: {cwd: 'tmp/checkout/alt-filenames'}
+      opts: {cwd: 'tmp/checkout/alt-filenames/trunk'}
     }, done);
   },
 
@@ -27,12 +27,10 @@ exports.wp_deploy = {
   tags: function(test) {
     test.expect(1);
     grunt.util.spawn({
-      cmd: 'ls',
-      args: ['-1', 'tags'],
-      opts: {cwd: 'tmp/checkout/alt-filenames'}
+      cmd: 'svn',
+      args: ['list', 'file://' + path.resolve() + '/tmp/repo/alt-filenames/tags'],
     },function( error, result, code ){
-      //C
-      var expected = "1.4.0";
+      var expected = "1.4.0/";
       test.equal( result.stdout, expected, 'The deployment repository`s tags are not as expected' )
       test.done();
     });
