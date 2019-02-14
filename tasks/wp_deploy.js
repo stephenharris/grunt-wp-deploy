@@ -17,23 +17,6 @@ module.exports = function(grunt) {
 	var awk = process.platform === 'win32'? 'gawk' : 'awk';
 	var no_run_if_empty = process.platform !== 'darwin' ? '--no-run-if-empty ' : '';
 
-
-	var checkOut = function ( ctxt, callback ) {
-		grunt.log.writeln( 'Checking out '+ ctxt.svnurl+ '...' );
-		exec( 'svn co ' + ctxt.force_interactive + ' '+ctxt.svnurl+ ' ' + ctxt.svnpath, { maxBuffer: ctxt.max_buffer }, function (error, stdout, stderr) {
-			if (error !== null) {
-				grunt.fail.fatal( 'Checkout of "'+ctxt.svnurl+'"unsuccessful: ' + error);
-			}
-
-			grunt.log.writeln( 'Check out complete.' + "\n" );
-
-			if( ctxt.deploy_tag && grunt.file.exists(  ctxt.svnpath+"/tags/"+ctxt.new_version) ){
-				grunt.fail.warn( 'Tag ' + ctxt.new_version + ' already exists');
-			}
-			callback( null, ctxt );
-		});
-	};
-
 	var clearTrunk = function ( ctxt, callback ) {
 		grunt.log.writeln( 'Clearing trunk.');
 		exec( 'rm -fr '+ctxt.svnpath+"/trunk/*", function(){
@@ -41,6 +24,31 @@ module.exports = function(grunt) {
 		});
 	};
 	
+		var checkOutTrunk = function ( ctxt, callback ) {
+		grunt.log.writeln( 'Checking out '+ ctxt.svnurl+ 'trunk/...' );
+		exec( 'svn co ' + ctxt.force_interactive + ' '+ctxt.svnurl+ 'trunk/ ' + ctxt.svnpath + '/trunk/', { maxBuffer: ctxt.max_buffer }, function (error, stdout, stderr) {
+			if (error !== null) {
+				grunt.fail.fatal( 'Checkout of "'+ctxt.svnurl+'trunk/" unsuccessful: ' + error);
+			}
+
+			grunt.log.writeln( 'Check out complete.' + "\n" );
+
+			callback( null, ctxt );
+		});
+	};
+	var checkOutAssets = function ( ctxt, callback ) {
+		grunt.log.writeln( 'Checking out '+ ctxt.svnurl+ 'assets/...' );
+		exec( 'svn co ' + ctxt.force_interactive + ' '+ctxt.svnurl+ 'assets/ ' + ctxt.svnpath + '/assets/', { maxBuffer: ctxt.max_buffer }, function (error, stdout, stderr) {
+			if (error !== null) {
+				grunt.fail.fatal( 'Checkout of "'+ctxt.svnurl+'assets/" unsuccessful: ' + error);
+			}
+
+			grunt.log.writeln( 'Check out complete.' + "\n" );
+
+			callback( null, ctxt );
+		});
+	};
+
 	var clearAssets = function ( ctxt, callback ) {
 		grunt.log.writeln( 'Clearing assets.');
 		exec( 'rm -fr '+ctxt.svnpath+"/assets/*", function(){
@@ -91,20 +99,19 @@ module.exports = function(grunt) {
 	};
 
 	var confirmation = function( ctxt, callback ) {
-		inquirer.prompt( [
+		inquirer.prompt([
 			{
 				type: "confirm",
 				name: "are_you_sure",
 				message: "\n" + "Are you sure you want to commit '" + ctxt.new_version + "'?"
-			}], 
-			function( answers ) {
+			}])
+			.then(function( answers ) {
 				if( !answers.are_you_sure ){
 					grunt.log.writeln( 'Aborting...' );
 					return;
 				}
 				callback( null, ctxt );
-			}
-		);
+			});
 	};
 
 	var addFiles = function( ctxt, callback ) {
@@ -127,11 +134,13 @@ module.exports = function(grunt) {
 		});
 	};
 
-	var copyToTag = function( ctxt, callback ) {
-		grunt.log.writeln( 'Copying ' + ctxt.new_version + ' to tag');
-		exec( "svn copy trunk/ tags/"+ctxt.new_version, { cwd: ctxt.svnpath }, function( error, stdout, stderr) {
-			if (error !== null) {
-				grunt.fail.warn( 'Failed to copy to tag: ' + error );
+	var checkTag = function( ctxt, callback ) {
+		var tagCheckMsg   = "Checking tag " + ctxt.new_version;
+		grunt.log.writeln( tagCheckMsg + "\n" );
+		var cmd = 'svn co ' + ctxt.svnurl + 'tags/' + ctxt.new_version + '/ ' + ctxt.svnpath + '/' + ctxt.new_version + '/ --username="'+ctxt.svnuser+'"';
+		exec( cmd, function( error, stdout, stderr) {
+			if (error === null) {
+				grunt.fail.fatal( 'Tag already exists' );
 			}
 			callback( null, ctxt );
 		});
@@ -140,10 +149,10 @@ module.exports = function(grunt) {
 	var commitTag = function( ctxt, callback ) {
 		var tagCommitMsg   = "Tagging " + ctxt.new_version;
 		grunt.log.writeln( tagCommitMsg + "\n" );
-		var cmd = 'svn commit ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+tagCommitMsg+'"';
-		exec( cmd , { cwd: ctxt.svnpath+'/tags/'+ctxt.new_version }, function( error, stdout, stderr) {
+		var cmd = 'svn copy ' + ctxt.svnurl + 'trunk/ ' + ctxt.svnurl + 'tags/' + ctxt.new_version + '/ ' + ctxt.force_interactive + ' --username="'+ctxt.svnuser+'" -m "'+tagCommitMsg+'"';
+		exec( cmd , { cwd: ctxt.svnpath }, function( error, stdout, stderr) {
 			if (error !== null) {
-				grunt.fail.warn( 'Failed to comit tag: ' + error );
+				grunt.fail.warn( 'Failed to commit tag: ' + error );
 			}
 			callback( null, ctxt );
 		});
@@ -202,6 +211,7 @@ module.exports = function(grunt) {
 		}
 	};
 
+
 	// Please see the Grunt documentation for more information regarding task
 	// creation: http://gruntjs.com/creating-tasks
 	grunt.registerMultiTask('wp_deploy', 'Deploys a git Repo to the WordPress SVN repo', function() {
@@ -241,8 +251,9 @@ module.exports = function(grunt) {
 			message: "What's your SVN username?",
 			when: !options.svn_user
 		});
-		
+
 		inquirer.prompt( questions).then(function(answers){
+
 			//Set up slug, main file, readme file and paths.
 			var slug = options.plugin_slug, plugin_file;
 
@@ -309,15 +320,16 @@ module.exports = function(grunt) {
 				function( callback ) {
 					callback( null, ctxt );
 				},
-				checkOut,
+				options.deploy_tag ? checkTag : null,
+				checkOutTrunk,
 				options.deploy_trunk ? clearTrunk : null,
 				options.deploy_trunk ? copyBuild : null,
+				options.assets_dir ? checkOutAssets : null,
 				options.assets_dir ? clearAssets : null,
 				options.assets_dir ? copyAssets : null,
 				options.skip_confirmation ? null : confirmation,
 				options.deploy_trunk ? addFiles : null,
 				options.deploy_trunk ? commitToTrunk : null,
-				options.deploy_tag ? copyToTag : null,
 				options.deploy_tag ? commitTag : null,
 				options.assets_dir ? addAssets : null,
 				options.assets_dir ? commitAssets : null
@@ -330,5 +342,4 @@ module.exports = function(grunt) {
 		});//Initial questions
 
 	}); //Register
-
 };

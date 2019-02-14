@@ -66,7 +66,7 @@ module.exports = function(grunt) {
     wp_deploy: {
 		first: { //First standard test
 			options: {
-				svn_url: 'file://' + path.resolve() + '/tmp/repo/standard',
+				svn_url: 'file://' + path.resolve() + '/tmp/repo/standard/',
 				plugin_slug: 'standard',
 				svn_user: 'stephenharris',  
 				skip_confirmation: true,
@@ -78,7 +78,7 @@ module.exports = function(grunt) {
 		},
 		second: { //Second commit (standard test)
 			options: {
-				svn_url: 'file://' + path.resolve() + '/tmp/repo/standard',
+				svn_url: 'file://' + path.resolve() + '/tmp/repo/standard/',
 				plugin_slug: 'standard',
 				svn_user: 'stephenharris',  
 				skip_confirmation: true,
@@ -90,7 +90,7 @@ module.exports = function(grunt) {
 		},
 		alt_filenames: { //Testing deployments using alternative readme file (i.e. not readme.txt) and alternative main plug-in file.
 			options: {
-				svn_url: 'file://' + path.resolve() + '/tmp/repo/alt-filenames',
+				svn_url: 'file://' + path.resolve() + '/tmp/repo/alt-filenames/',
 				plugin_slug: 'alt-filenames',
 				plugin_main_file: 'alt-plugin-main-file.php',
 				svn_user: 'stephenharris',  
