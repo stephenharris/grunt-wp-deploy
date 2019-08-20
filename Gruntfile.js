@@ -14,8 +14,8 @@ module.exports = function( grunt ) {
 	// Initialize an svn repository (for tests)
 	grunt.registerMultiTask( 'init_repo', 'Initialize a svn repository in a directory.', function() {
 		var dest = this.files[0].dest;
-	  var destAbs = path.resolve() + '/' + dest;
-	  grunt.config.set( '_svnURl', destAbs );
+		var destAbs = path.resolve() + '/' + dest;
+		grunt.config.set( '_svnURl', destAbs );
 
 		if ( ! grunt.file.exists( dest ) ) {
 			grunt.file.mkdir( dest );
@@ -48,43 +48,43 @@ module.exports = function( grunt ) {
 	grunt.initConfig( {
 		// Configurations to be run (and then tested).
 		wp_deploy: {
-		  first: { //First standard test
-		  	options: {
-		  		svn_url: 'file://' + path.resolve() + '/tmp/repo/standard/',
-		  		plugin_slug: 'standard',
-		  		svn_user: 'stephenharris',
-		  		skip_confirmation: true,
-		  		build_dir: 'test/fixtures/first/build', //relative path to your build directory
-		  		assets_dir: 'test/fixtures/first/assets', //relative path to your assets directory (optional).
-		  		tmp_dir: 'tmp/checkout',
-		  		force_interactive: false,
-		  	},
-		  },
-		  second: { //Second commit (standard test)
-		  	options: {
-		  		svn_url: 'file://' + path.resolve() + '/tmp/repo/standard/',
-		  		plugin_slug: 'standard',
-		  		svn_user: 'stephenharris',
-		  		skip_confirmation: true,
-		  		build_dir: 'test/fixtures/second/build', //relative path to your build directory
-		  		assets_dir: 'test/fixtures/second/assets', //relative path to your assets directory (optional).
-		  		tmp_dir: 'tmp/checkout',
-		  		force_interactive: false,
-		  	},
-		  },
-		  alt_filenames: { //Testing deployments using alternative readme file (i.e. not readme.txt) and alternative main plug-in file.
-		  	options: {
-		  		svn_url: 'file://' + path.resolve() + '/tmp/repo/alt-filenames/',
-		  		plugin_slug: 'alt-filenames',
-		  		plugin_main_file: 'alt-plugin-main-file.php',
-		  		svn_user: 'stephenharris',
-		  		skip_confirmation: true,
-		  		build_dir: 'test/fixtures/alt-filenames/build', //relative path to your build directory
-		  		assets_dir: false,
-		  		tmp_dir: 'tmp/checkout',
-		  		force_interactive: false,
-		  	},
-		  },
+			first: { //First standard test
+				options: {
+					svn_url: 'file://' + path.resolve() + '/tmp/repo/standard/',
+					plugin_slug: 'standard',
+					svn_user: 'stephenharris',
+					skip_confirmation: true,
+					build_dir: 'test/fixtures/first/build', //relative path to your build directory
+					assets_dir: 'test/fixtures/first/assets', //relative path to your assets directory (optional).
+					tmp_dir: 'tmp/checkout',
+					force_interactive: false,
+				},
+			},
+			second: { //Second commit (standard test)
+				options: {
+					svn_url: 'file://' + path.resolve() + '/tmp/repo/standard/',
+					plugin_slug: 'standard',
+					svn_user: 'stephenharris',
+					skip_confirmation: true,
+					build_dir: 'test/fixtures/second/build', //relative path to your build directory
+					assets_dir: 'test/fixtures/second/assets', //relative path to your assets directory (optional).
+					tmp_dir: 'tmp/checkout',
+					force_interactive: false,
+				},
+			},
+			alt_filenames: { //Testing deployments using alternative readme file (i.e. not readme.txt) and alternative main plug-in file.
+				options: {
+					svn_url: 'file://' + path.resolve() + '/tmp/repo/alt-filenames/',
+					plugin_slug: 'alt-filenames',
+					plugin_main_file: 'alt-plugin-main-file.php',
+					svn_user: 'stephenharris',
+					skip_confirmation: true,
+					build_dir: 'test/fixtures/alt-filenames/build', //relative path to your build directory
+					assets_dir: false,
+					tmp_dir: 'tmp/checkout',
+					force_interactive: false,
+				},
+			},
 			version_mismatch: { //Testing version check of readme.txt 'stable' tag and plugin version should be skipped when deploy_tag is false.
 				options: {
 					svn_url: 'file://' + path.resolve() + '/tmp/repo/version-mismatch',
@@ -98,30 +98,30 @@ module.exports = function( grunt ) {
 				},
 			},
 			stable_tag_in_list: { //Testing deployments using alternative readme file (i.e. not readme.txt) and alternative main plug-in file.
-		  	options: {
-		  		svn_url: 'file://' + path.resolve() + '/tmp/repo/stable-tag-in-list',
-		  		plugin_slug: 'stable-tag-in-list',
-		  		plugin_main_file: 'stable-tag-in-list.php',
-		  		svn_user: 'stephenharris',
-		  		skip_confirmation: true,
-		  		build_dir: 'test/fixtures/stable-tag-in-list/build', //relative path to your build directory
-		  		assets_dir: false,
-		  		tmp_dir: 'tmp/checkout',
-		  		force_interactive: false,
-		  	},
-		  },
+				options: {
+					svn_url: 'file://' + path.resolve() + '/tmp/repo/stable-tag-in-list',
+					plugin_slug: 'stable-tag-in-list',
+					plugin_main_file: 'stable-tag-in-list.php',
+					svn_user: 'stephenharris',
+					skip_confirmation: true,
+					build_dir: 'test/fixtures/stable-tag-in-list/build', //relative path to your build directory
+					assets_dir: false,
+					tmp_dir: 'tmp/checkout',
+					force_interactive: false,
+				},
+			},
 		},
 
-	  clean: {
+		clean: {
 			all: [ 'tmp' ],
-	  	repo: [ 'tmp/repo' ],
-	  	checkout_standard: [ 'tmp/checkout/standard' ],
-	  	checkout_alt_filenames: [ 'tmp/checkout/alt-filenames' ],
+			repo: [ 'tmp/repo' ],
+			checkout_standard: [ 'tmp/checkout/standard' ],
+			checkout_alt_filenames: [ 'tmp/checkout/alt-filenames' ],
 			checkout_version_mismatch: [ 'tmp/checkout/version-mismatch' ],
 			stable_tag_in_list: [ 'tmp/checkout/stable-tag-in-list' ],
-	  },
+		},
 
-	  // Initialise the repositories we use in the tests
+		// Initialise the repositories we use in the tests
 		init_repo: {
 			standard: {
 				dest: 'tmp/repo/standard',
@@ -130,9 +130,9 @@ module.exports = function( grunt ) {
 				dest: 'tmp/repo/alt-filenames',
 			},
 			version_mismatch:
-      {
-      	dest: 'tmp/repo/version-mismatch',
-      },
+			{
+				dest: 'tmp/repo/version-mismatch',
+			},
 			stable_tag_in_list: {
 				dest: 'tmp/repo/stable-tag-in-list',
 			},
