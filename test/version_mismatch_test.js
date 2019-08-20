@@ -18,8 +18,8 @@ exports.wp_deploy = {
 
 	build_files: function( test ) {
 		test.expect( 2 );
-	  test.ok( grunt.file.exists( path.join( 'tmp/checkout/version-mismatch/trunk', 'readme.txt' ) ), 'The file ‘readme.txt’ should have been copied into the repository.' );
-	  test.ok( grunt.file.exists( path.join( 'tmp/checkout/version-mismatch/trunk', 'version-mismatch.php' ) ), 'The file ‘standard.php’ should have been copied into the repository.' );
+		test.ok( grunt.file.exists( path.join( 'tmp/checkout/version-mismatch/trunk', 'readme.txt' ) ), 'The file ‘readme.txt’ should have been copied into the repository.' );
+		test.ok( grunt.file.exists( path.join( 'tmp/checkout/version-mismatch/trunk', 'version-mismatch.php' ) ), 'The file ‘standard.php’ should have been copied into the repository.' );
 		test.done();
 	},
 

@@ -17,10 +17,10 @@ exports.wp_deploy = {
 	},
 
 	/**
-   * Check the build directory has all the files it should have
-   * and that files present in the first build but not the second
-   * have been removed. (e.g. to-be-removed.php)
-   */
+	 * Check the build directory has all the files it should have
+	 * and that files present in the first build but not the second
+	 * have been removed. (e.g. to-be-removed.php)
+	 */
 	build_files: function( test ) {
 		test.expect( 17 );
 
@@ -37,26 +37,26 @@ exports.wp_deploy = {
 
 		//Make sure no additional files crept in:
 		grunt.file.recurse( 'tmp/checkout/standard/trunk', function( abs, root, subdir, file ) {
-    	subdir = ( 'undefined' === typeof subdir ) ? '' : subdir;
+			subdir = ( 'undefined' === typeof subdir ) ? '' : subdir;
 			if ( grunt.file.isMatch( { dot: true }, [ '**/.svn/**', '**.svn-base' ], abs ) ) {
-    		return;
-    	}
-    	test.ok( grunt.file.exists( path.join( 'test/fixtures/second/build', subdir, file ) ), 'The file ‘' + file + '’ has been copied into trunk but should not have been.' );
+				return;
+			}
+			test.ok( grunt.file.exists( path.join( 'test/fixtures/second/build', subdir, file ) ), 'The file ‘' + file + '’ has been copied into trunk but should not have been.' );
 		} );
 		grunt.file.recurse( 'tmp/checkout/standard/assets', function( abs, root, subdir, file ) {
 			if ( grunt.file.isMatch( { dot: true }, [ '**/.svn/**', '**.svn-base' ], abs ) ) {
-    		return;
-    	}
-    	test.ok( grunt.file.exists( path.join( 'test/fixtures/second/assets', file ) ), 'The file ‘' + file + '’ has been copied into assets but should not have been.' );
+				return;
+			}
+			test.ok( grunt.file.exists( path.join( 'test/fixtures/second/assets', file ) ), 'The file ‘' + file + '’ has been copied into assets but should not have been.' );
 		} );
 
 		test.done();
 	},
 
 	/**
-   * Check the asset directory has all the files it should have
-   * and that files removed from the second build are have been removed
-   */
+	 * Check the asset directory has all the files it should have
+	 * and that files removed from the second build are have been removed
+	 */
 	assets_files: function( test ) {
 		test.expect( 3 );
 		test.ok( grunt.file.exists( path.join( 'tmp/checkout/standard/assets', 'cat.png' ) ), 'The file ‘cat.png’ should have been copied into the repository.' );
@@ -66,8 +66,8 @@ exports.wp_deploy = {
 	},
 
 	/**
-   * Check that all the commit messages are present and in order
-   */
+	 * Check that all the commit messages are present and in order
+	 */
 	commit_message: function( test ) {
 		test.expect( 1 );
 		grunt.util.spawn( {
@@ -84,8 +84,8 @@ exports.wp_deploy = {
 	},
 
 	/**
-   * Check the tags directory contains all the released versions
-   */
+	 * Check the tags directory contains all the released versions
+	 */
 	tags: function( test ) {
 		test.expect( 1 );
 		grunt.util.spawn( {
