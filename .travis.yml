@@ -9,13 +9,11 @@ node_js:
   - "10"
   - "node"
 
-sudo: false
-
 install:
-- npm install grunt-cli
-- npm install
-  
-script: 
-- node_modules/grunt-cli/bin/grunt test
+  - npm install
+
+script:
+  - npm run lint
+  - npm run test
 
 
