@@ -50,17 +50,6 @@ module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
-    jshint: {
-      all: [
-        'Gruntfile.js',
-        'tasks/*.js',
-      ],
-      options: {
-        jshintrc: '.jshintrc',
-	      reporter: require('jshint-stylish'),
-      },
-    },
-
     // Configurations to be run (and then tested).
     wp_deploy: {
 		  first: { //First standard test
@@ -164,14 +153,13 @@ module.exports = function(grunt) {
   grunt.loadTasks('tasks');
 
   // These plugins provide necessary tasks.
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-nodeunit');
 
   // Whenever the "test" task is run, first clean the "tmp" dir, then run this
   // plugin's task(s), then test the result.
-  grunt.registerTask('test', [ 'jshint', 'functional_test'] );
-  
+  grunt.registerTask('test', ['functional_test'] );
+
   grunt.registerTask('functional_test', [
       'clean', 'init_repo',
       'wp_deploy:first', 'clean:checkout_standard', 'wp_deploy:second',
