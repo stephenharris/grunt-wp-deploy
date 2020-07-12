@@ -5,8 +5,8 @@ os:
   - osx
 
 node_js:
-  - "6"
   - "10"
+  - "12"
   - "node"
 
 sudo: false
