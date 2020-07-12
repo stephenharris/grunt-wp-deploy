@@ -1,7 +1,7 @@
 {
   "name": "grunt-wp-deploy",
   "description": "Deploys a build directory to the WordPress SVN repo",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "homepage": "https://github.com/stephenharris/grunt-wp-deploy",
   "author": {
     "name": "Stephen Harris",

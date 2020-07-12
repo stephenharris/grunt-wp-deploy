@@ -127,6 +127,10 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### 2.1.0 - 12th July 2020
+
+- Update dependencies, resolve security warnings
+
 ### 2.0.0 - 14th February 2019
 - No longer checkouts out tags, which reduces check-out time. Thanks to @johnbillion
 - Updated inquirer and other dependencies due to potential security vulnerabilities. Thanks to @dbtlr. Fixes #40
