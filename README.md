@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/stephenharris/grunt-wp-deploy.svg?branch=develop)](https://travis-ci.org/stephenharris/grunt-wp-deploy)
+[![Build Status](https://travis-ci.org/stephenharris/grunt-wp-deploy.svg?branch=master)](https://travis-ci.org/stephenharris/grunt-wp-deploy)
 
 # grunt-wp-deploy
 
