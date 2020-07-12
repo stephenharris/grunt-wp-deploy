@@ -127,6 +127,11 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### 2.1.1 - 12th July 2020
+
+- Update diff dependencie
+- Publish through GitHub actions
+
 ### 2.1.0 - 12th July 2020
 
 - Update dependencies, resolve security warnings
